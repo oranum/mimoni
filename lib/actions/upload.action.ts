@@ -1,17 +1,15 @@
 'use server'
 
+import mongoose, { Connection } from "mongoose";
 import { connectToDatabase } from "../database";
 import Transaction, { ITransaction } from "../database/models/transaction.model";
 import { UpdateOneModel } from "mongodb";
 
-type BulkOperation = {
-    updateOne?: UpdateOneModel<any>;
-}[];
-
 export const uploadTransactions = async (transactions: ITransaction[]) => {
     try {
-        const connection = await connectToDatabase();
-        const bulkOperations: BulkOperation = [];
+        console.log("uploadTransactions function is trying to connect to the database")
+        const connection: Connection = await connectToDatabase();
+        const bulkOperations = [];
 
         for (const transactionData of transactions) {
             const filter = { hash: transactionData.hash };
@@ -25,8 +23,9 @@ export const uploadTransactions = async (transactions: ITransaction[]) => {
                 }
             });
         }
+        console.log("uploadTransactions function is trying to bulkOperation")
 
-        await connection.collection('transactions').bulkWrite(bulkOperations);
+        await connection.collection('transactions').bulkWrite(bulkOperations)
         console.log('Transactions uploaded successfully!');
     } catch (error) {
         console.error('Error uploading transactions:', error);
