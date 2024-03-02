@@ -18,7 +18,7 @@ export const connectToDatabase = async () => {
     }
     if (!MONGODB_URI)
         throw new Error(
-            "Please define the MONGODB_URI environment variable inside .env.local"
+            "from connectToDatabase: MONGODB_URI is undefined"
         );
 
     cached.promise = cached.promise || await mongoose.connect(MONGODB_URI, {
