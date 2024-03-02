@@ -1,27 +1,20 @@
-'use server'
-import { UpdateOneModel } from "mongodb";
 import { connectToDatabase } from "../database";
 import Transaction, { ITransaction } from "../database/models/transaction.model";
+import { UpdateOneModel } from "mongodb";
 
-
-//get the raw data of the JSON file from caspion
-//parse the data into an array of transactions
-//upload the transactions to the database
-
-
-
-type bulkOperations = {
-    updateOne?: UpdateOneModel<any>
-}[]
+type BulkOperation = {
+    updateOne?: UpdateOneModel<any>;
+}[];
 
 export const uploadTransactions = async (transactions: ITransaction[]) => {
     try {
         const connection = await connectToDatabase();
-        const bulkOperations: bulkOperations = []
+        const bulkOperations: BulkOperation = [];
+
         for (const transactionData of transactions) {
-            const transaction = new Transaction(transactionData);
-            const filter = { hash: transaction.hash };
-            const update = { $setOnInsert: transaction };
+            const filter = { hash: transactionData.hash };
+            const update = { $setOnInsert: transactionData };
+
             bulkOperations.push({
                 updateOne: {
                     filter,
@@ -30,9 +23,11 @@ export const uploadTransactions = async (transactions: ITransaction[]) => {
                 }
             });
         }
-        connection.collection('transactions').bulkWrite(bulkOperations);
-    }
-    catch {
+
+        await connection.collection('transactions').bulkWrite(bulkOperations);
+        console.log('Transactions uploaded successfully!');
+    } catch (error) {
+        console.error('Error uploading transactions:', error);
         throw new Error('Error uploading transactions');
     }
 }
