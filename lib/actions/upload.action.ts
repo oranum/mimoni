@@ -1,3 +1,5 @@
+'use server'
+
 import { connectToDatabase } from "../database";
 import Transaction, { ITransaction } from "../database/models/transaction.model";
 import { UpdateOneModel } from "mongodb";

@@ -2,12 +2,16 @@ import mongoose from "mongoose";
 
 //chech if we already have a connection to the database
 
-const MONGODB_URI = process.env.MONGODB_URI;
+
 let cached = (global as any).mongoose || { conn: null, promise: null };
 
 
 export const connectToDatabase = async () => {
+    const MONGODB_URI = process.env.MONGODB_URI;
+    console.log("starting connection to database")
+    console.log(MONGODB_URI)
     if (cached.conn) {
+        console.log("found cached connection")
         return cached.conn;
     }
     if (!MONGODB_URI)
@@ -22,7 +26,5 @@ export const connectToDatabase = async () => {
 
     cached.conn = await cached.promise;
 
-
-
-return cached.conn;
+    return cached.conn;
 }
