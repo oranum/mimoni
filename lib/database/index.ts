@@ -1,32 +1,33 @@
-'use server'
+import mongoose, { Connection } from 'mongoose';
 
-import mongoose from "mongoose";
+(global as any).mongoose = (global as any).mongoose || { conn: null, promise: null } as { conn: Connection | typeof import("mongoose") | null; promise: Promise<Connection> | Promise<typeof import("mongoose")> | null; }
 
-//chech if we already have a connection to the database
-
-
-let cached = (global as any).mongoose || { conn: null, promise: null };
-
+let cached = global as any
 
 export const connectToDatabase = async () => {
-    const MONGODB_URI = "mongodb+srv://oranlimony:Burgata1@cluster0.russcec.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    console.log("starting connection to database")
-    console.log(MONGODB_URI)
+    const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://oranlimony:Burgata1@cluster0.russcec.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+    console.log("Starting connection to database");
+    console.log(MONGODB_URI);
+
     if (cached.conn) {
-        console.log("found cached connection")
+        console.log("Found cached connection");
         return cached.conn;
     }
-    if (!MONGODB_URI)
-        throw new Error(
-            "from connectToDatabase: MONGODB_URI is undefined"
-        );
 
-    cached.promise = cached.promise || await mongoose.connect(MONGODB_URI, {
-        dbName: "mimoni",
-        bufferCommands: false,
-    });
+    if (!MONGODB_URI) {
+        throw new Error("MONGODB_URI is undefined");
+    }
 
-    cached.conn = await cached.promise;
+    try {
+        cached.promise = cached.promise || mongoose.connect(MONGODB_URI, {
+            dbName: "mimoni",
+        });
 
-    return cached.conn;
-}
+        cached.conn = await cached.promise;
+
+        return cached.conn;
+    } catch (error) {
+        console.error("Error connecting to MongoDB:", error);
+        throw error;
+    }
+};
