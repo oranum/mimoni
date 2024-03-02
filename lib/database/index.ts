@@ -1,3 +1,5 @@
+'use server'
+
 import mongoose from "mongoose";
 
 //chech if we already have a connection to the database
