@@ -9,7 +9,7 @@ let cached = (global as any).mongoose || { conn: null, promise: null };
 
 
 export const connectToDatabase = async () => {
-    const MONGODB_URI = process.env.MONGODB_URI;
+    const MONGODB_URI = "mongodb+srv://oranlimony:Burgata1@cluster0.russcec.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
     console.log("starting connection to database")
     console.log(MONGODB_URI)
     if (cached.conn) {
