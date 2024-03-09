@@ -1,7 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
-export interface ITransaction extends Document {
-    _id: string;
+export interface ITransaction {
+    _id?: string;
     type: string;
     identifier: any;
     date: string;
@@ -15,16 +15,16 @@ export interface ITransaction extends Document {
     accountNumber: string;
     hash: string;
     category: string;
-    _createdAt: Date;
-    _calibratedDate: Date;
-    _convertedILSAmount: number;
-    _isProcessed: boolean;
-    _category: { _id: string, name: string },
-    _note: string;
-    _tags: string[];
-    _lastUpdated: Date;
-    _isAutoCategory: boolean;
-    _isApproved: boolean;
+    _createdAt?: Date;
+    _calibratedDate?: Date;
+    _convertedILSAmount?: number;
+    _isProcessed?: boolean;
+    _category?: { _id: string, name: string },
+    _note?: string;
+    _tags?: string[];
+    _lastUpdated?: Date;
+    _isAutoCategory?: boolean;
+    _isApproved?: boolean;
 }
 
 
@@ -44,14 +44,14 @@ const TransactionSchema = new Schema({
     category: { type: String },
     _createdAt: { type: Date, required: true, default: Date.now },
     _calibratedDate: { type: Date },
-    _convertedILSAmount: { type: Number, required: true },
+    _convertedILSAmount: { type: Number },
     _isProcessed: { type: Boolean, required: true, default: false },
     _category: { type: Schema.Types.ObjectId, ref: "Category" },
-    _note: { type: String, required: true },
-    _tags: { type: [String], required: true },
-    _lastUpdated: { type: Date, required: true },
-    _isAutoCategory: { type: Boolean, required: true },
-    _isApproved: { type: Boolean, required: true }
+    _note: { type: String },
+    _tags: { type: [String] },
+    _lastUpdated: { type: Date },
+    _isAutoCategory: { type: Boolean },
+    _isApproved: { type: Boolean, required: true, default: false }
 });
 
 const Transaction = models.Transaction || model("Transaction", TransactionSchema);
