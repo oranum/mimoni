@@ -1,7 +1,6 @@
-import { Schema, model, models } from "mongoose";
+import { ObjectId, Schema, model, models } from "mongoose";
 
-export interface ITransaction {
-    _id?: string;
+export type ITransaction = {
     type: string;
     identifier: any;
     date: string;
@@ -15,16 +14,17 @@ export interface ITransaction {
     accountNumber: string;
     hash: string;
     category: string;
-    _createdAt?: Date;
-    _calibratedDate?: Date;
+    _id: string;
+    _createdAt: Date;
+    _calibratedDate: Date;
     _convertedILSAmount?: number;
-    _isProcessed?: boolean;
+    _isProcessed: boolean;
     _category?: { _id: string, name: string },
     _note?: string;
     _tags?: string[];
-    _lastUpdated?: Date;
+    _lastUpdated: Date;
     _isAutoCategory?: boolean;
-    _isApproved?: boolean;
+    _isApproved: boolean;
 }
 
 

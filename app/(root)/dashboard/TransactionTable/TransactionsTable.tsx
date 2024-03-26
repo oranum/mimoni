@@ -1,7 +1,12 @@
 "use client"
 
 import {
+    Cell,
     ColumnDef,
+    Row,
+    RowData,
+    Updater,
+    VisibilityState,
     flexRender,
     getCoreRowModel,
     useReactTable,
@@ -15,21 +20,90 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { ITransaction } from "@/lib/database/models/transaction.model"
+import { useEffect, useState } from "react"
+import { set } from "mongoose"
+import { updateTransactionApi } from "@/app/api/route"
 
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data: TData[]
+
+declare module '@tanstack/table-core' {
+    interface TableMeta<TData extends RowData> {
+        updateData: (row: Row<TData>, columnId: string, value: unknown) => void
+    }
 }
+
+const defaultColumn: Partial<ColumnDef<ITransaction>> = {
+    cell: ({ getValue, row, column: { id }, table }) => {
+        const initialValue = getValue()
+        // We need to keep and update the state of the cell normally
+        const [value, setValue] = useState(initialValue)
+        // When the input is blurred, we'll call our table meta's updateData function
+        const onBlur = () => {
+            initialValue !== value && table.options.meta?.updateData(row, id, value)
+        }
+        // If the initialValue is changed external, sync it up with our state
+        useEffect(() => {
+            setValue(initialValue)
+        }, [initialValue])
+        return (
+            <input
+                value={value as string}
+                onChange={e => setValue(e.target.value)}
+                onBlur={onBlur}
+            />
+        )
+    },
+}
+interface DataTableProps<TData, TValue> {
+    columns: ColumnDef<ITransaction, TValue>[]
+    data: ITransaction[]
+    setData: React.Dispatch<React.SetStateAction<ITransaction[]>>
+}
+
 
 export function TransactionsTable<TData, TValue>({
     columns,
     data,
+    setData,
 }: DataTableProps<TData, TValue>) {
+
+    const [rowSelection, setRowSelection] = useState({})
+
     const table = useReactTable({
         data,
         columns,
+        defaultColumn,
         getCoreRowModel: getCoreRowModel(),
+        onRowSelectionChange: setRowSelection,
+
+        state: {
+            rowSelection,
+            columnVisibility: {
+                "hash": false,
+            }
+        },
+        meta: {
+            updateData: (row, columnId, value) => {
+                const rowHash = row.getValue('hash')
+                console.log(rowHash, columnId, value)
+                setData(oldArray => oldArray.map((row) => {
+                    if (row.hash === rowHash) {
+
+                        return {
+                            ...row,
+                            [columnId]: value,
+                        }
+                    }
+                    return row
+                }))
+                const updatedRow: ITransaction | undefined = { ...row.original, [columnId]: value }
+                updateTransactionApi(updatedRow)
+            }
+        },
+
     })
+
+
 
     return (
         <div className="rounded-md border">
@@ -77,4 +151,5 @@ export function TransactionsTable<TData, TValue>({
             </Table>
         </div>
     )
+
 }

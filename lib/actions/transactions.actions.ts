@@ -1,3 +1,4 @@
+'use server'
 import { connectToDatabase } from "../database";
 import { ITransaction } from "../database/models/transaction.model";
 
@@ -5,12 +6,40 @@ export const getTransactions = async () => {
     try {
         console.log("Fetching transactions from the database");
         const mongoose = await connectToDatabase();
-        const collection = mongoose.connection.collection('transactions');
-        const transactions = await collection.find().toArray();
+        console.log("Connected to the database");
+        const collection = mongoose.connection.collection<ITransaction>('transactions');
+        const transactions = (await collection.find().toArray())
+        // .map((transaction) => {
+        //     const { _id, ...transactionWithoutId } = transaction;
+        //     return transactionWithoutId;
+        // });
+
         console.log('Transactions fetched successfully!');
         return transactions;
+
     } catch (error) {
         console.error('Error fetching transactions:', error);
         throw new Error('Error fetching transactions');
+    }
+}
+
+export const updateTransaction = async (transaction: ITransaction) => {
+
+    try {
+        console.log('transaction to be updated:')
+        console.log(transaction)
+        // const transaction = await JSON.parse(transactionJSON);
+
+
+        const mongoose = await connectToDatabase();
+        console.log('Connected to the database');
+        const collection = mongoose.connection.collection<ITransaction>('transactions');
+        const { _id, ...transactionWithoutId } = transaction;
+        const objectId = new mongoose.Types.ObjectId(transaction._id)
+        await collection.updateOne({ _id: objectId }, { $set: transactionWithoutId });
+        console.log('Transaction updated successfully!');
+    } catch (error) {
+        console.error('Error updating transaction:', error);
+        throw new Error('Error updating transaction');
     }
 }
