@@ -6,6 +6,10 @@ import { CategorySelector } from "./table-components/categorySelector"
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { table } from "console";
+import ComboboxWithAdd from "@/components/ui/combobox-with-add";
+import { createCategoryAction } from "@/lib/actions/categories.actions";
+import { ICategory } from "@/lib/database/models/category.model";
+import { CalendarDays } from "lucide-react";
 
 
 export const columns: ColumnDef<ITransaction>[] = [
@@ -35,7 +39,6 @@ export const columns: ColumnDef<ITransaction>[] = [
         id: "hash",
         accessorKey: 'hash',
         header: 'Hash',
-        //make it invisivble
 
     },
 
@@ -43,9 +46,15 @@ export const columns: ColumnDef<ITransaction>[] = [
         id: "date",
         accessorKey: "date",
         header: "Original Date",
-        cell: ({ row }) => new Date(row.getValue("date")).toLocaleDateString("he-IL"),
-
-
+        cell: ({ row }) => {
+            const displayDate = new Date((row.getValue("_calibratedDate") || row.getValue("date"))).toLocaleDateString("he-IL")
+            return (
+                <div className="flex gap-1">
+                    {displayDate}
+                    <Button variant='outline' size={"icon"} className='w-5 h-5' onClick={() => { }}>{<CalendarDays />}</Button>
+                </div>
+            )
+        }
     },
     {
         id: "originalAmount",
@@ -76,9 +85,21 @@ export const columns: ColumnDef<ITransaction>[] = [
     },
     {
         id: "_category",
-        accessorKey: "_category.name",
+        accessorKey: "_category",
         header: "Category",
-        cell: ({ row }) => <CategorySelector />,
+        cell: ({ row, column, table }) => {
+            const autoCategory = table.options.meta?.autoCatMap.get(row.getValue("hash") as string)
+            return (
+                <ComboboxWithAdd
+                    setValue={(selected) => {
+                        console.log("selected", selected)
+                        table.options.meta?.updateData(row, column.id, { name: selected })
+                    }}
+                    onAdd={async (newCategory) => await createCategoryAction({ name: newCategory, ignore: false })}
+                    categoryName={(row.getValue("_category") as ICategory)?.name || autoCategory?.name || ""}
+                    items={table.options.meta?.categoryList || []} />
+            )
+        }
     },
     {
         id: "_createdAt",
@@ -89,6 +110,12 @@ export const columns: ColumnDef<ITransaction>[] = [
         id: "_lastUpdated",
         accessorKey: "_lastUpdated",
         header: "Last Updated",
+    },
+    {
+        id: "_calibratedDate",
+        accessorKey: "_calibratedDate",
+        header: "Calibrated Date",
+
     },
     {
         id: "_isApproved",
@@ -104,9 +131,7 @@ export const columns: ColumnDef<ITransaction>[] = [
             return (
                 <Button onClick={() => {
                     const hash = row.getValue("hash") as string
-                    const targetColumn = column.id
-                    console.log("hash: ", hash, "targetColumn: ", targetColumn, "value to set: ", "true")
-                    table.options.meta?.updateData(hash, targetColumn, true)
+                    table.options.meta?.updateData(row, column.id, true)
                 }}>אשר</Button >
             )
         },

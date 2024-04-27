@@ -50,10 +50,9 @@ export const uploadTransactions = async (transactions: ITransaction[]) => {
 
         const collection = mongoose.connection.collection('transactions');
         await collection.bulkWrite(bulkOperations)
-
-
-
         console.log('Transactions uploaded successfully!');
+        return "success"
+
     } catch (error) {
         console.error('Error uploading transactions:', error);
         throw new Error('Error uploading transactions');

@@ -11,12 +11,16 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
+    CommandList,
+    CommandSeparator,
 } from "@/components/ui/command"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { Separator } from "@radix-ui/react-dropdown-menu"
+import { createCategoryAction } from "@/lib/actions/categories.actions"
 
 const frameworks = [
     {
@@ -41,9 +45,20 @@ const frameworks = [
     },
 ]
 
+
+
 export function CategorySelector() {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState("")
+    const [query, setQuery] = React.useState("")
+
+    const onCreate = (query: string) => {
+        setValue(query)
+        setOpen(false)
+        createCategoryAction({ name: query })
+
+    }
+
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -54,17 +69,29 @@ export function CategorySelector() {
                     aria-expanded={open}
                     className="w-[200px] justify-between"
                 >
-                    {value
-                        ? frameworks.find((framework) => framework.value === value)?.label
-                        : "Select framework..."}
+                    {value || "Select framework..."}
                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0">
                 <Command>
-                    <CommandInput placeholder="Search framework..." className="h-9" />
-                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandInput value={query} onValueChange={(query) => setQuery(query)} placeholder="Search framework..." className="h-9" />
+                    {/* <CommandEmpty>No framework found.</CommandEmpty> */}
+                    <CommandEmpty
+                        onClick={() => {
+                            onCreate(query);
+                            setQuery('');
+                        }
+                        }
+                        className='flex cursor-pointer items-center justify-center gap-1 italic'
+                    >
+                        <p>Create: </p>
+                        <p className='block max-w-48 truncate font-semibold text-primary'>
+                            {query}
+                        </p>
+                    </CommandEmpty>
                     <CommandGroup>
+
                         {frameworks.map((framework) => (
                             <CommandItem
                                 key={framework.value}
@@ -74,6 +101,7 @@ export function CategorySelector() {
                                     setOpen(false)
                                 }}
                             >
+
                                 {framework.label}
                                 <CheckIcon
                                     className={cn(
@@ -82,7 +110,16 @@ export function CategorySelector() {
                                     )}
                                 />
                             </CommandItem>
+
                         ))}
+                        <CommandSeparator />
+                        {query && (
+                            <CommandItem onSelect={() => {
+                                onCreate(query)
+                                setQuery('')
+                            }}
+                            >צור קטגוריה:  {query}</CommandItem>)}
+
                     </CommandGroup>
                 </Command>
             </PopoverContent>

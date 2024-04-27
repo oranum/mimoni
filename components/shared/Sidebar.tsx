@@ -4,7 +4,7 @@ import logo from '../../assets/images/logoipsum.svg'
 import Link from 'next/link';
 import React from 'react';
 import Image from 'next/image';
-import { HomeIcon, MenuIcon, Microscope, MicroscopeIcon, SearchIcon, SplitIcon } from 'lucide-react';
+import { HomeIcon, MenuIcon, Microscope, MicroscopeIcon, SearchIcon, SplitIcon, UploadIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import avatar from '../../assets/images/avatar.png';
 
@@ -14,7 +14,8 @@ const Sidebar = () => {
     const menuItems = [
         { text: 'דף הבית', link: '/dashboard', icon: <HomeIcon /> },
         { text: 'תובנות', link: '/insights', icon: <MicroscopeIcon /> },
-        { text: 'מיון פעולות', link: '/dashboard', icon: <SplitIcon /> },
+        { text: 'מיון פעולות', link: '/inbox', icon: <SplitIcon /> },
+        { text: 'העלאת קובץ', link: '/upload', icon: <UploadIcon /> },
     ];
 
     return (
@@ -42,7 +43,7 @@ const Sidebar = () => {
             </div>
             <div className='p-4 flex gap-3 items-center'>
                 <Image src={avatar} alt={'avatar'} width={40} height={40} className='rounded-full' />
-                
+
             </div>
         </nav >
     );

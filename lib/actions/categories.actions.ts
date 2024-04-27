@@ -1,7 +1,10 @@
 'use server'
 import { connectToDatabase } from "../database";
 import { ICategory } from "../database/models/category.model";
+import { ICategoryFilter } from "../database/models/categoryFilter.model";
 import { ITransaction } from "../database/models/transaction.model";
+import checkFilter from "../logic/checkFilter";
+import { getAllFilters } from "./filters.actions";
 
 export const getCategoryList = async () => {
     try {
@@ -16,7 +19,7 @@ export const getCategoryList = async () => {
         // });
 
         console.log('Categories fetched successfully!');
-        return categories;
+        return categories.map(category => category.name);
 
     } catch (error) {
         console.error('Error fetching Categories:', error);
@@ -25,7 +28,7 @@ export const getCategoryList = async () => {
 }
 
 
-export const createCategory = async (category: ICategory) => {
+export const createCategoryAction = async (category: ICategory) => {
     try {
         console.log("Creating category in the database");
         const mongoose = await connectToDatabase();
@@ -42,3 +45,31 @@ export const createCategory = async (category: ICategory) => {
 }
 
 
+export const findAutoCategory = async (transaction: ITransaction, filtersArray?: ICategoryFilter[]) => {
+    try {
+        filtersArray = filtersArray || await getAllFilters();
+        for (const filter of filtersArray) {
+            const result = checkFilter(filter, transaction);
+            if (result) {
+                return filter.category;
+            }
+        }
+        return null;
+    }
+    catch (error) {
+        console.error('Error finding auto category:', error);
+        throw new Error('Error finding auto category');
+    }
+}
+
+export const findAutoCategoryBulk = async (transactions: ITransaction[]) => {
+    let results = new Map<string, ICategory | null>()
+    // let results: { hash: string, category: ICategory | null }
+    const filtersArray = await getAllFilters();
+    for (const transaction of transactions) {
+        const result = await findAutoCategory(transaction, filtersArray);
+        results.set(transaction.hash, result);
+    }
+    console.log(results)
+    return results;
+}

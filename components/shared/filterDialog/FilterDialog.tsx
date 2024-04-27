@@ -20,6 +20,8 @@ import { useEffect, useState } from "react"
 import FilterRow from "./FilterRow"
 import { PlayCircleIcon, PlusCircleIcon, icons } from "lucide-react"
 import Dropdown from "./Dropdown"
+import { getTransactions } from "@/lib/actions/transactions.actions"
+import { getCategoryList } from "@/lib/actions/categories.actions"
 
 type FilterDialogProps = {
     defaultTransaction?: ITransaction,
@@ -27,12 +29,36 @@ type FilterDialogProps = {
     children?: React.ReactNode,
 }
 
+const MONTHS_TO_GET_TRANSACTIONS = 6
 
 
 const FilterDialog = ({ children, defaultCategory, defaultTransaction }: FilterDialogProps) => {
 
+
+    const [pastTransactions, setPastTransactions] = useState<ITransaction[]>([])
+    const [categoryList, setCategoryList] = useState<string[]>([])
+
+
+
+    useEffect(() => {
+        async function getPastTransactions() {
+            const pastTransactions = await getTransactions(MONTHS_TO_GET_TRANSACTIONS)
+            setPastTransactions(pastTransactions)
+            console.log(pastTransactions)
+        }
+        getPastTransactions()
+    }, [])
+
+    useEffect(() => {
+        async function fetch() {
+            const categoryList = await getCategoryList()
+            setCategoryList(categoryList)
+        }
+        fetch()
+    }, [])
+
+
     const targetTypeList = ['פעולה', 'הוצאה', 'הכנסה']
-    const categoryList = ['קטגוריה 1', 'קטגוריה 2', 'קטגוריה 3', 'קטגוריה 4', 'קטגוריה 5']
     return (
         <Dialog>
             {children ?
@@ -45,7 +71,7 @@ const FilterDialog = ({ children, defaultCategory, defaultTransaction }: FilterD
                 </DialogTrigger>
             }
             <DialogContent className="min-w-[850px] min-h-[580px] flex flex-col justify-between">
-                <_FilterDialogContent />
+                <_FilterDialogContent categoryList={categoryList} pastTransactions={pastTransactions} />
                 {/* defaultCategory={defaultCategory} defaultTransaction={defaultTransaction}  */}
             </DialogContent >
         </Dialog>

@@ -24,6 +24,7 @@ export type ITransaction = {
     _tags?: string[];
     _lastUpdated: Date;
     _isAutoCategory?: boolean;
+    _ignore: boolean;
     _isApproved: boolean;
 }
 
@@ -51,6 +52,7 @@ const TransactionSchema = new Schema({
     _tags: { type: [String] },
     _lastUpdated: { type: Date },
     _isAutoCategory: { type: Boolean },
+    _ignore: { type: Boolean, required: true, default: false },
     _isApproved: { type: Boolean, required: true, default: false }
 });
 

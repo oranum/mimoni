@@ -2,7 +2,7 @@ import { ICategoryFilter, IFilterRow } from "../database/models/categoryFilter.m
 import { ITransaction } from "../database/models/transaction.model"
 
 
-const checkFilter = async (filter: ICategoryFilter, transaction: ITransaction) => {
+const checkFilter = (filter: ICategoryFilter, transaction: ITransaction) => {
     for (const filterLine of filter.filters) {
         if (!checkFilterLine(filterLine, transaction)) {
             return false
@@ -22,19 +22,28 @@ const checkFilterLine = ({ field, operator, valuePrimary, valueSecondary }: IFil
         .set('סכום', 'originalAmount')
         .set('קטגוריה', 'category')
         .set('תאריך', 'date')
+        .set('יום החיוב', '_calibratedDate')
+        // .set('סוג', '_')
+        .set('תגיות', '_tags')
+        .set('הערה', '_note')
+        .set('מספר חשבון', 'accountNumber')
+
+
 
     function getFieldValue(fieldName: string) {
         if (fieldName && fieldNameToKeyMap.has(fieldName)) {
             const key = fieldNameToKeyMap.get(fieldName) as keyof ITransaction;
             return transaction[key];
         }
+        return ''
     }
 
+    console.log(field, getFieldValue(field), operator, valuePrimary, valueSecondary)
 
     switch (operator) {
-        case 'כולל':
+        case 'מכיל':
             return getFieldValue(field).includes(valuePrimary)
-        case 'לא כולל':
+        case 'אינו מכיל':
             return !getFieldValue(field).includes(valuePrimary)
         case 'גדול מ':
             return getFieldValue(field) > parseInt(valuePrimary)
@@ -42,7 +51,7 @@ const checkFilterLine = ({ field, operator, valuePrimary, valueSecondary }: IFil
             return getFieldValue(field) < parseInt(valuePrimary)
         case 'שווה ל':
             return getFieldValue(field) === valuePrimary
-        case 'בין':
+        case 'יום החיוב':
             if (field === '_calibratedDate' && valuePrimary && valueSecondary) {
                 const day = new Date(getFieldValue(field)).getDate()
                 return day >= Number(valuePrimary) && day <= Number(valueSecondary)

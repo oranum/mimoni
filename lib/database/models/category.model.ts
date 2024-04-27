@@ -3,12 +3,14 @@ import { Schema, model, models } from "mongoose";
 export type ICategory = {
     userId?: string;
     name: string;
+    ignore: boolean;
 }
 
 
 const CategorySchema = new Schema({
     userId: { type: String },
-    name: { type: String, required: true }
+    name: { type: String, required: true },
+    ignore: { type: Boolean, required: true, default: false }
 });
 
 // const CategoryFilter = models.CategoryFilterSchema || model("CategoryFilter", CategoryFilterSchema);

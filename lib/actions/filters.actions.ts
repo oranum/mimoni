@@ -41,6 +41,25 @@ export const setCategoryFilter = async (filter: ICategoryFilter) => {
 
 }
 
+export const getAllFilters = async () => {
+    try {
+        console.log("Fetching filters from the database");
+        const mongoose = await connectToDatabase();
+        console.log("Connected to the database");
+        const collection = mongoose.connection.collection<ICategoryFilter>('CategoryFilters');
+        const filters = (await collection.find().toArray())
+
+        console.log('Filters fetched successfully!');
+        return filters;
+
+    } catch (error) {
+        console.error('Error fetching filters:', error);
+        throw new Error('Error fetching filters');
+    }
+}
+
+
+
 
 
 

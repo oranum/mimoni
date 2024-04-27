@@ -3,7 +3,6 @@ import { useEffect, useReducer } from 'react'
 import Dropdown from './Dropdown'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { IFilterRow } from '@/lib/database/models/categoryFilter.model'
 import { Button } from '@/components/ui/button'
 import { Trash2Icon } from 'lucide-react'
 import { IFilterRowId, randomID } from './_FilterDialogContent'
@@ -26,46 +25,46 @@ interface Options2 {
 interface Options3 {
     [key: string]: string[];
 }
-const options1: Option[] = [
-    {
-        display: "כותרת",
-        type: "text"
-    },
-    {
-        display: "תיאור",
-        type: "text"
-    },
-    {
-        display: "יום החיוב",
-        type: "date"
-    },
-    {
-        display: "סכום",
-        type: "amount"
-    },
-    {
-        display: "קטגוריה",
-        type: "text"
-    },
-    {
-        display: "מספר חשבון",
-        type: "account"
-    },
-    {
-        display: "תגיות",
-        type: "tags"
-    },
-    {
-        display: "הערה",
-        type: "note"
-    },
-    {
-        display: "סוג",
-        type: "type"
-    }
+// const options1: Option[] = [
+//     {
+//         display: "כותרת",
+//         type: "text"
+//     },
+//     {
+//         display: "תיאור",
+//         type: "text"
+//     },
+//     {
+//         display: "יום החיוב",
+//         type: "date"
+//     },
+//     {
+//         display: "סכום",
+//         type: "amount"
+//     },
+//     {
+//         display: "קטגוריה",
+//         type: "text"
+//     },
+//     {
+//         display: "מספר חשבון",
+//         type: "select"
+//     },
+//     {
+//         display: "תגיות",
+//         type: "text"
+//     },
+//     {
+//         display: "הערה",
+//         type: "text"
+//     },
+//     {
+//         display: "סוג",
+//         type: "select"
+//     }
 
-]
-const option1Types = new Map<string, keyof Options2>([
+// ]
+const options1 = new Map<string, keyof Options2>([
     ["כותרת", "text"],
     ["תיאור", "text"],
     ["יום החיוב", "date"],
@@ -74,13 +73,13 @@ const option1Types = new Map<string, keyof Options2>([
     ["מספר חשבון", "account"],
     ["תגיות", "tags"],
     ["הערה", "note"],
-    ["סוג", "type"]
+    ["סוג", "select"]
 ])
 const options2: Options2 = {
     text: ["מכיל", "אינו מכיל", "שווה ל"],
     date: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
     amount: ["גדול מ", "קטן מ", "בידיוק"],
-    account: ["שווה ל", "שונה מ"],
+    select: ["שווה ל", "שונה מ"],
     tags: ["כולל", "לא כולל"],
     note: ["מכיל", "אינו מכיל", "שווה ל"],
 }
@@ -100,12 +99,12 @@ const FilterRow = ({ label, row, setRow, deleteRow }: FilterRowProps) => {
         switch (action.componentIndex) {
             case 1:
                 newState.field = action.payload
-                newState.operator = ''
+                newState.operator = newState.field === 'יום החיוב' ? 'יום החיוב' : ''
+                console.log(newState.operator)
                 newState.valuePrimary = ''
                 newState.valueSecondary = ''
                 break
             case 2:
-
                 newState.operator = action.payload
                 break
             case 3:
@@ -126,13 +125,14 @@ const FilterRow = ({ label, row, setRow, deleteRow }: FilterRowProps) => {
 
 
     function renderComponent() {
-        switch (option1Types.get(state.field)) {
+        switch (options1.get(state.field)) {
             case "text":
                 return (<>
                     <Dropdown items={options2.text} selected={state.operator} setSelected={(p) => setSelected(p, 2)} />
                     <Input value={state.valuePrimary || ''} onChangeCapture={(e) => setSelected(e.currentTarget.value, 3)} />
                 </>)
             case "date":
+
                 return (<>
                     <div className="flex items-center gap-2">
                         <Label>הוא</Label>
@@ -151,7 +151,7 @@ const FilterRow = ({ label, row, setRow, deleteRow }: FilterRowProps) => {
                     <Dropdown items={options2.amount} selected={state.operator} setSelected={(p) => setSelected(p, 2)} />
                     <Input name='user-input' value={state.valuePrimary} type={'number'} onChangeCapture={(e) => setSelected(e.currentTarget.value, 3)} />
                 </>
-            case "account":
+            case "select":
                 <div className="flex items-center gap-2">
                     <Label>הוא</Label>
                     <Dropdown items={options2.date} selected={state.operator} setSelected={(p) => {
@@ -173,7 +173,7 @@ const FilterRow = ({ label, row, setRow, deleteRow }: FilterRowProps) => {
                 </Button>
                 <Label >{label}</Label>
             </div>
-            <Dropdown items={options1.map(option => option.display)} selected={state.field} setSelected={(p) => setSelected(p, 1)} />
+            <Dropdown items={Array.from(options1, ([display, type]) => display)} selected={state.field} setSelected={(p) => setSelected(p, 1)} />
             {renderComponent()}
             {/* <Dropdown items={getOptions2(field)} selected={selected2} setSelected={setSelected2} /> */}
 

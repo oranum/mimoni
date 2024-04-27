@@ -16,6 +16,9 @@ import { PlusCircleIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ICategoryFilter, IFilterRow } from '@/lib/database/models/categoryFilter.model'
 import { setCategoryFilter } from '@/lib/actions/filters.actions'
+import { getTransactions } from '@/lib/actions/transactions.actions'
+import { ITransaction } from '@/lib/database/models/transaction.model'
+import checkFilter from '@/lib/logic/checkFilter'
 
 
 export interface IFilterRowId extends IFilterRow {
@@ -29,16 +32,25 @@ export function randomID() {
 type FilterDialogContentProps = {
     defaultRows?: IFilterRow[]
     defaultCategory?: string
+    pastTransactions: ITransaction[]
+    categoryList: string[]
 }
 
-const _FilterDialogContent = ({ defaultRows, defaultCategory }: FilterDialogContentProps) => {
+
+const _FilterDialogContent = ({ defaultRows, defaultCategory, pastTransactions, categoryList }: FilterDialogContentProps) => {
 
 
 
 
     const [filterRows, setFilterRows] = useState<IFilterRowId[]>([{ rowId: randomID(), field: 'כותרת', operator: '', valuePrimary: '' }])
-    const [category, setCategory] = useState<string>(defaultCategory || '')
+    const [categoryName, setCategoryName] = useState<string>(defaultCategory || '')
     const [targetType, setTargetType] = useState<string>('פעולה')
+
+    const newCategoryFilter: ICategoryFilter = {
+        category: { name: categoryName, ignore: false },
+        targetType,
+        filters: filterRows
+    }
 
     function setRowHandler(newRow: IFilterRowId) {
         setFilterRows(filterRows.map((oldRow, i) => {
@@ -50,22 +62,17 @@ const _FilterDialogContent = ({ defaultRows, defaultCategory }: FilterDialogCont
         setFilterRows((prev) => prev.filter(row => row.rowId !== idToDelete))
     }
     function submitHandler() {
-        const newCategoryFilter: ICategoryFilter = {
-            category,
-            targetType,
-            filters: filterRows
-        }
-
         setCategoryFilter(newCategoryFilter);
-
     }
 
-    useEffect(() => {
-    }, [filterRows])
-
+    const filteredPastTransactions = pastTransactions.filter(transaction => {
+        const result = checkFilter(newCategoryFilter, transaction)
+        console.log(result)
+        return result
+    })
+    // console.log(filteredPastTransactions.length)
 
     const targetTypeList = ['פעולה', 'הוצאה', 'הכנסה']
-    const categoryList = ['קטגוריה 1', 'קטגוריה 2', 'קטגוריה 3', 'קטגוריה 4', 'קטגוריה 5']
 
 
     return (
@@ -80,7 +87,7 @@ const _FilterDialogContent = ({ defaultRows, defaultCategory }: FilterDialogCont
 
                 <div className="grid grid-cols-4 items-center gap-4">
                     <Label className='text-left col-span-1'>הוסף את הקטגוריה</Label>
-                    <Dropdown items={categoryList} selected={category} setSelected={setCategory} />
+                    <Dropdown items={categoryList} selected={categoryName} setSelected={setCategoryName} />
                     <div className="flex items-center gap-2">
                         <Label>לכל</Label>
                         <Dropdown items={targetTypeList} selected={targetType} setSelected={setTargetType} width="w-fit" />
@@ -91,7 +98,6 @@ const _FilterDialogContent = ({ defaultRows, defaultCategory }: FilterDialogCont
 
                 <div className="grid gap-4">
                     {filterRows.map((row, index) => {
-                        console.log(row)
                         return (
                             <FilterRow
                                 key={row.rowId}
@@ -119,11 +125,32 @@ const _FilterDialogContent = ({ defaultRows, defaultCategory }: FilterDialogCont
             </div>
 
             <DialogFooter>
-                <DialogClose asChild>
-                    <Button onClick={submitHandler}>שמור</Button>
-                </DialogClose>
-            </DialogFooter>
-            {/* </form> */}
+                <div className='flex flex-col justify-end w-full mt-10'>
+                    <div className="border-t border-black my-4"></div>
+                    <span className='text-center'>נמצאו {filteredPastTransactions.length} תנועות</span>
+                    <div className="w-full flex flex-col justify-center text-center gap-4 overflow-scroll  bg-slate-500 rounded-lg">
+                        <div className='w-full h-[200px] flex justify-center'>
+                            <ul className='flex flex-col w-full p-4'>
+
+                                {filteredPastTransactions.map((transaction) => {
+                                    return (
+                                        <li key={transaction._id} className='flex justify-between border-b border-gray-300 py-2'>
+                                            <span>{transaction.description}</span>
+                                            <span>{transaction.originalAmount}</span>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className='w-full flex justify-end mt-[15px]'>
+                        <DialogClose asChild>
+                            <Button className='w-20' onClick={submitHandler}>שמור</Button>
+                        </DialogClose >
+                    </div>
+                </div>
+            </DialogFooter >
         </>
     )
 }

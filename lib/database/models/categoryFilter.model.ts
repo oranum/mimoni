@@ -1,4 +1,5 @@
 import { Schema, model, models } from "mongoose";
+import { ICategory } from "./category.model";
 
 export type IFilterRow = {
     field: string;
@@ -8,7 +9,7 @@ export type IFilterRow = {
 }
 
 export type ICategoryFilter = {
-    category: string;
+    category: ICategory;
     targetType: string;
     filters: IFilterRow[];
 }
