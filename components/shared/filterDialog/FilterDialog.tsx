@@ -29,7 +29,7 @@ type FilterDialogProps = {
     children?: React.ReactNode,
 }
 
-const MONTHS_TO_GET_TRANSACTIONS = 6
+const MONTHS_TO_GET_EXAMPLE_TRANSACTIONS = 6
 
 
 const FilterDialog = ({ children, defaultCategory, defaultTransaction }: FilterDialogProps) => {
@@ -42,23 +42,21 @@ const FilterDialog = ({ children, defaultCategory, defaultTransaction }: FilterD
 
     useEffect(() => {
         async function getPastTransactions() {
-            const pastTransactions = await getTransactions(MONTHS_TO_GET_TRANSACTIONS)
+            const pastTransactions = await getTransactions(MONTHS_TO_GET_EXAMPLE_TRANSACTIONS)
             setPastTransactions(pastTransactions)
-            console.log(pastTransactions)
         }
         getPastTransactions()
     }, [])
 
     useEffect(() => {
         async function fetch() {
-            const categoryList = await getCategoryList()
-            setCategoryList(categoryList)
+            const categoryList = await getCategoryList(true)
+            setCategoryList(categoryList as string[])
         }
         fetch()
     }, [])
 
 
-    const targetTypeList = ['פעולה', 'הוצאה', 'הכנסה']
     return (
         <Dialog>
             {children ?
@@ -70,10 +68,8 @@ const FilterDialog = ({ children, defaultCategory, defaultTransaction }: FilterD
                     <Button variant="outline">קטגוריה אוטומטית</Button>
                 </DialogTrigger>
             }
-            <DialogContent className="min-w-[850px] min-h-[580px] flex flex-col justify-between">
-                <_FilterDialogContent categoryList={categoryList} pastTransactions={pastTransactions} />
-                {/* defaultCategory={defaultCategory} defaultTransaction={defaultTransaction}  */}
-            </DialogContent >
+            <_FilterDialogContent categoryList={categoryList} pastTransactions={pastTransactions} />
+            {/* defaultCategory={defaultCategory} defaultTransaction={defaultTransaction}  */}
         </Dialog>
     )
 }

@@ -10,6 +10,8 @@ import { Search } from 'lucide-react'
 import { findAutoCategoryBulk, getCategoryList } from '@/lib/actions/categories.actions'
 import { ICategory } from '@/lib/database/models/category.model'
 import { set } from 'mongoose'
+import FilterDialog from '@/components/shared/filterDialog/FilterDialog'
+import { Button } from '@/components/ui/button'
 
 const Inbox = () => {
 
@@ -36,7 +38,7 @@ const Inbox = () => {
     useEffect(() => {
         const fetch = async () => {
             const categoryList = await getCategoryList()
-            setCategoryList(categoryList)
+            setCategoryList(categoryList as string[])
         }
         fetch()
     }, [])
@@ -49,6 +51,9 @@ const Inbox = () => {
                 {/*  <div className="flex flex-col h-full"> */}
                 <h1 className='text-3xl font-bold py-6 px-4'>מיון פעולות</h1>
                 {/* <div className='flex-1 overflow-y-auto' > */}
+                <FilterDialog>
+                    <Button variant="outline">קטגוריה אוטומטית</Button>
+                </FilterDialog>
                 <TransactionsTable
                     columns={columns}
                     autoCatMap={autoCatMap}

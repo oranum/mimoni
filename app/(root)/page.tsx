@@ -1,11 +1,22 @@
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { CommandItem } from '@/components/ui/command';
+'use client'
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation'
+
 
 export default function Home() {
+
+
+    const router = useRouter()
+    useEffect(() => {
+        router.push('/inbox')
+    }, [])
+
+
     return (
         <main>
-            <Button variant="default" className='px-10 py-40' >Clicddfk mes</Button>
+
+
         </main>
     );
 }

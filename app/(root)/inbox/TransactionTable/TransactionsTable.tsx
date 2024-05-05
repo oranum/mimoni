@@ -28,6 +28,7 @@ import { updateTransactionApi } from "@/app/api/route"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ICategory } from "@/lib/database/models/category.model"
+import { updateTransaction, updateTransactionField } from "@/lib/actions/transactions.actions"
 
 
 declare module '@tanstack/table-core' {
@@ -94,7 +95,6 @@ export function TransactionsTable<TData, TValue>({
                 "_createdAt": false,
                 "_lastUpdated": false,
                 "_calibratedDate": false,
-
             }
         },
         meta: {
@@ -102,9 +102,7 @@ export function TransactionsTable<TData, TValue>({
                 if (row.getValue('hash') === undefined) {
                     console.log(row)
                 }
-
-                const rowHash = row.getValue('hash')
-                console.log(rowHash, columnId, value)
+                const rowHash = row.getValue('hash') as string
                 setData(oldArray => oldArray.map((row) => {
                     if (row.hash === rowHash) {
 
@@ -115,8 +113,10 @@ export function TransactionsTable<TData, TValue>({
                     }
                     return row
                 }))
-                const updatedRow: ITransaction | undefined = { ...row.original, [columnId]: value }
-                updateTransactionApi(updatedRow)
+                // const updatedRow: ITransaction | undefined = { ...row.original, [columnId]: value }
+                // console.log(updatedRow._calibratedDate)
+                // updateTransaction(updatedRow)
+                updateTransactionField(value, rowHash, columnId)
             },
             autoCatMap,
             categoryList,

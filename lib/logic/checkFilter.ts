@@ -38,7 +38,7 @@ const checkFilterLine = ({ field, operator, valuePrimary, valueSecondary }: IFil
         return ''
     }
 
-    console.log(field, getFieldValue(field), operator, valuePrimary, valueSecondary)
+    // console.log(field, getFieldValue(field), operator, valuePrimary, valueSecondary)
 
     switch (operator) {
         case 'מכיל':

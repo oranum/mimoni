@@ -23,8 +23,6 @@ const Upload = () => {
     })
   }
 
-  console.log("this is the process.env:")
-  console.log(process.env.MONGODB_URI)
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [jsonData, setJsonData] = useState<ITransaction[]>([]);
 

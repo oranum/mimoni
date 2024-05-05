@@ -36,7 +36,6 @@ type ComboboxWithAddProps = {
 export default function ComboboxWithAdd({ categoryName, setValue, items, onAdd, placeholder }: ComboboxWithAddProps) {
     const [open, setOpen] = React.useState(false)
     const [query, setQuery] = React.useState("")
-    console.log(categoryName)
     const onCreate = (query: string) => {
         setValue(query)
         setOpen(false)
@@ -51,7 +50,7 @@ export default function ComboboxWithAdd({ categoryName, setValue, items, onAdd, 
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={`w-[200px] justify-between text-black ${!categoryName && "text-cyan-700"}`}
+                    className={`w-full justify-between text-black ${!categoryName && "text-cyan-700"}`}
                 >
                     {categoryName || placeholder || "בחר מהרשימה..."}
                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />

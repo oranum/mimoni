@@ -20,7 +20,7 @@ const processDataForChart = (transactions: ITransaction[]): ChartData[] => {
 
         const currentDate = new Date();
         const isWithinPast12Months = (currentDate.getFullYear() - date.getFullYear()) * 12 + currentDate.getMonth() - date.getMonth() <= 12;
-        isWithinPast12Months || console.log('isWithinPast12Months', isWithinPast12Months)
+        isWithinPast12Months
 
         const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
 
@@ -58,7 +58,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const data = await getTransactions(12)
+            const data = await getTransactions(12, true, true)
             setTransactions(data)
         }
         fetchData()

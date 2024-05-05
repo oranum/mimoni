@@ -13,6 +13,7 @@ type FilterRowProps = {
     row: IFilterRowId,
     setRow: (newRow: IFilterRowId) => void
     deleteRow: (rowId: string) => void
+    showTrash: boolean
 }
 interface Option {
     display: string;
@@ -88,7 +89,7 @@ const options2: Options2 = {
 
 
 
-const FilterRow = ({ label, row, setRow, deleteRow }: FilterRowProps) => {
+const FilterRow = ({ label, row, setRow, deleteRow, showTrash }: FilterRowProps) => {
     function setSelected(payload: string, componentIndex: 1 | 2 | 3 | 4) {
         dispatch({ componentIndex, payload })
     }
@@ -100,7 +101,6 @@ const FilterRow = ({ label, row, setRow, deleteRow }: FilterRowProps) => {
             case 1:
                 newState.field = action.payload
                 newState.operator = newState.field === 'יום החיוב' ? 'יום החיוב' : ''
-                console.log(newState.operator)
                 newState.valuePrimary = ''
                 newState.valueSecondary = ''
                 break
@@ -121,7 +121,6 @@ const FilterRow = ({ label, row, setRow, deleteRow }: FilterRowProps) => {
     }
 
     const [state, dispatch] = useReducer(reducer, { ...row })
-
 
 
     function renderComponent() {
@@ -163,14 +162,19 @@ const FilterRow = ({ label, row, setRow, deleteRow }: FilterRowProps) => {
         }
     }
 
+    const TrashButton = () => {
+        return (
+            <Button onClick={() => deleteRow(state.rowId)} variant='ghost' size="icon">
+                <Trash2Icon color='grey' />
+            </Button>
+        )
+    }
 
     return (
         // <div className='flex justify-evenly '>
         <div className="grid grid-cols-4 items-center gap-4">
             <div className="col-span-1 flex justify-between items-center">
-                <Button onClick={() => deleteRow(state.rowId)} variant='ghost' size="icon">
-                    <Trash2Icon color='grey' />
-                </Button>
+                {showTrash ? <TrashButton /> : <div />}
                 <Label >{label}</Label>
             </div>
             <Dropdown items={Array.from(options1, ([display, type]) => display)} selected={state.field} setSelected={(p) => setSelected(p, 1)} />

@@ -1,25 +1,44 @@
-
-import { HamburgerMenuIcon } from '@radix-ui/react-icons';
+'no store'
 import logo from '../../assets/images/logoipsum.svg'
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { HomeIcon, MenuIcon, Microscope, MicroscopeIcon, SearchIcon, SplitIcon, UploadIcon } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { HomeIcon, LayoutListIcon, MenuIcon, Microscope, MicroscopeIcon, SearchIcon, SplitIcon, UploadIcon } from 'lucide-react';
 import avatar from '../../assets/images/avatar.png';
+import { getNumberOfInboxTransactions } from '@/lib/actions/transactions.actions';
+import { Badge, badgeVariants } from '../ui/badge';
 
+const ItemBadge = ({ value }: { value: number }) => {
+    return (
+        <div className='bg-red-500 text-white font-medium rounded-full w-4 h-4 flex justify-center items-center text-center text-xs'>
+            {value}</div>
+    )
+}
 
-
-const Sidebar = () => {
+const Sidebar = async () => {
+    const transactionsNumber = await getNumberOfInboxTransactions();
     const menuItems = [
         { text: 'דף הבית', link: '/dashboard', icon: <HomeIcon /> },
+        {
+            text: 'מיון פעולות', link: '/inbox',
+            icon: <SplitIcon />,
+            // <div className="relative inline-block">
+            //     <SplitIcon />
+            //     <span className="absolute top-[6px] left-[25px]">
+            //         <div className='bg-red-500 text-white font-medium rounded-full w-4 h-4 flex justify-center items-center text-center text-xs'>
+            //             {transactionsNumber}</div>
+            //     </span>
+            // </div>
+            badge: transactionsNumber
+
+        },
         { text: 'תובנות', link: '/insights', icon: <MicroscopeIcon /> },
-        { text: 'מיון פעולות', link: '/inbox', icon: <SplitIcon /> },
-        { text: 'העלאת קובץ', link: '/upload', icon: <UploadIcon /> },
+        { text: 'קטגוריות', link: '/categories', icon: <LayoutListIcon /> },
+        { text: 'העלאת קובץ', link: '/upload', icon: <UploadIcon /> }
     ];
 
     return (
-        <nav className="flex flex-col justify-between min-w-[200px] h-screen bg-gray-800 text-white">
+        <nav className="flex flex-col justify-between  min-w-[200px] h-screen bg-gray-800 text-white">
             <div className="flex flex-col justify-between"> {/* top */}
                 <div className='flex justify-center items-center py-4 px-3'>
                     {/* <MenuIcon /> */}
@@ -30,13 +49,14 @@ const Sidebar = () => {
                         </div>
                     </Link>
                 </div>
-                <ul className="flex flex-col gap-5 mt-10 pr-5">
+                <ul className="flex flex-col gap-5 mt-10 pr-5 pl-4">
                     {menuItems.map(item =>
-                        <li key={item.text} className="flex justify-start align-middle text-center w-full">
+                        <li key={item.text} className="flex justify-between items-center w-full">
                             <Link href={item.link} className='flex gap-3'>
                                 {item.icon}
                                 {item.text}
                             </Link>
+                            {typeof item.badge === 'number' && <ItemBadge value={item.badge} />}
                         </li>)}
 
                 </ul>

@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { SavedSearchesDropdown } from './components/SavedSearchesDropdown'
 import Dropdown from '@/components/shared/filterDialog/Dropdown'
 import FilterRow from '@/components/shared/filterDialog/FilterRow'
-import FilterDialog from '@/components/shared/filterDialog/FilterDialog'
 
 
 
@@ -28,9 +27,7 @@ const Insights = () => {
                 } />
                 <
                  */}
-                <FilterDialog>
-                    <Button variant="outline">קטגוריה אוטומטית</Button>
-                </FilterDialog>
+               
             </div >
 
         </>

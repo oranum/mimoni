@@ -6,20 +6,22 @@ import { ITransaction } from "../database/models/transaction.model";
 import checkFilter from "../logic/checkFilter";
 import { getAllFilters } from "./filters.actions";
 
-export const getCategoryList = async () => {
+export const getCategoryList = async (asString = true) => {
     try {
         console.log("Fetching categories from the database");
         const mongoose = await connectToDatabase();
         console.log("Connected to the database");
         const collection = mongoose.connection.collection<ICategory>('categories');
         const categories = (await collection.find().toArray())
-        // .map((transaction) => {
-        //     const { _id, ...transactionWithoutId } = transaction;
-        //     return transactionWithoutId;
-        // });
+
+        const withoutId: ICategory[] = categories.map((category) => {
+            const { _id, ...categoryWithoutId } = category;
+            return categoryWithoutId;
+        })
 
         console.log('Categories fetched successfully!');
-        return categories.map(category => category.name);
+        const returnValue = asString ? withoutId.map(category => category.name) : withoutId;
+        return returnValue;
 
     } catch (error) {
         console.error('Error fetching Categories:', error);
@@ -70,6 +72,5 @@ export const findAutoCategoryBulk = async (transactions: ITransaction[]) => {
         const result = await findAutoCategory(transaction, filtersArray);
         results.set(transaction.hash, result);
     }
-    console.log(results)
     return results;
 }

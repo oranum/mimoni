@@ -18,6 +18,11 @@ export const uploadTransactions = async (transactions: ITransaction[]) => {
             _createdAt: new Date(),
             _isProcessed: true,
             _lastUpdated: new Date(),
+            _ignore: false,
+            _category: null,
+            _calibratedAmount: transaction.chargedAmount,
+            _originalAmount: transaction.originalAmount,
+
         }
     }
 
