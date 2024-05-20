@@ -33,33 +33,37 @@ export const uploadTransactions = async (transactions: ITransaction[]) => {
         const mongoose = await connectToDatabase();
         const bulkOperations = [];
 
+        // Assuming YourModel represents your Mongoose model
+        const uniqueHashes = new Set(); // Set to store unique hashes
+
         for (const transaction of mutatedTransactions) {
-            const filter = { hash: transaction.hash };
-            const update = {
+            if (!uniqueHashes.has(transaction.hash)) {
+                uniqueHashes.add(transaction.hash);
 
-                $setOnInsert: transaction // Include $setOnInsert for insert if not exists
-            };
+                const filter = { hash: transaction.hash };
+                const update = {
+                    $setOnInsert: transaction // Include $setOnInsert for insert if not exists
+                };
 
-            bulkOperations.push({
-                updateOne: {
-                    filter,
-                    update,
-                    upsert: true
-                }
-            });
+                bulkOperations.push({
+                    updateOne: {
+                        filter,
+                        update,
+                        upsert: true // Use upsert to insert if not found
+                    }
+                });
+            }
         }
 
-        console.log("uploadTransactions function is trying to bulkwrite")
-
-
-
-        const collection = mongoose.connection.collection('transactions');
-        await collection.bulkWrite(bulkOperations)
-        console.log('Transactions uploaded successfully!');
-        return "success"
-
+        // Perform bulk write for unique items
+        if (bulkOperations.length > 0) {
+            const result = await Transaction.bulkWrite(bulkOperations);
+            const count = result.upsertedCount;
+            const message = count ? `נוספו ${result.upsertedCount} תנועות חדשות` : "אין תנועות חדשות להוספה";
+            return message;
+        }
+        return "No new transactions"
     } catch (error) {
-        console.error('Error uploading transactions:', error);
-        throw new Error('Error uploading transactions');
+        console.error("Error in uploadTransactions:", error);
     }
 }

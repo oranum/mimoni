@@ -9,9 +9,8 @@ import { useEffect, useState } from "react"
 import { getTransactions } from "@/lib/actions/transactions.actions"
 import { ITransaction } from "@/lib/database/models/transaction.model"
 import { set } from "mongoose"
+import MonthSelector from "@/components/shared/MonthSelector"
 
-// let totalIncome = 0;
-// let totalExpenses = 0;
 
 const processDataForChart = (transactions: ITransaction[]): ChartData[] => {
     const chartDataMap: Map<string, ChartData> = new Map();
@@ -54,7 +53,33 @@ const processDataForChart = (transactions: ITransaction[]): ChartData[] => {
 const Dashboard = () => {
     const [showBalance, setShowBalance] = useState(false)
     const [transactions, setTransactions] = useState<ITransaction[]>([])
+    const [selectedMonth, setSelectedMonth] = useState<Date>(new Date())
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+
     // const [chartData, setChartData] = useState<ChartData[]>([])
+    const getRangeTransactions = () => {
+        function getMonthsDifference(date: Date) {
+            const today = new Date();
+            const givenDate = new Date(date);
+            const yearsDifference = today.getFullYear() - givenDate.getFullYear();
+            const monthsDifference = today.getMonth() - givenDate.getMonth();
+            const totalMonthsDifference = yearsDifference * 12 + monthsDifference;
+            return totalMonthsDifference;
+        }
+        const monthsDifference = Math.min(getMonthsDifference(selectedMonth), 5)
+        const startMonth = new Date(selectedMonth)
+        startMonth.setMonth(selectedMonth.getMonth() - (6 + monthsDifference))
+        const endMonth = new Date(selectedMonth)
+        endMonth.setMonth(selectedMonth.getMonth() + (5 - monthsDifference))
+        const filteredTransactions = transactions.filter(transaction => {
+            const transactionDate = new Date(transaction._calibratedDate);
+            return transactionDate >= startMonth && transactionDate <= endMonth;
+        });
+
+        return filteredTransactions;
+    }
+    const rangeTransactions = getRangeTransactions()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -75,11 +100,12 @@ const Dashboard = () => {
     const expensesAverage = (totalExpenses / 12 * -1);
 
 
-    const chartData = processDataForChart(transactions)
+    const chartData = processDataForChart(rangeTransactions)
 
 
     return (
-        <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 ">
+            <MonthSelector selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} />
             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
                 <DataCard title="הכנסה חודשית ממוצעת" amount={incomeAverage} info="איזה יופי" Icon={CoinsIcon} />
                 <DataCard title="הוצאה חודשית ממוצעת" amount={expensesAverage} info="איזה יופי" Icon={DollarSign} />
@@ -105,7 +131,7 @@ const Dashboard = () => {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </div >
     )
 }
 

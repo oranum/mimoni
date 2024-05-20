@@ -19,6 +19,12 @@ const Inbox = () => {
     const [autoCatMap, setAutoCatMap] = useState<Map<string, ICategory | null>>(new Map())
     const [categoryList, setCategoryList] = useState<string[]>([])
 
+
+    async function fetchAutoCatMap() {
+        const autoCatMap = await findAutoCategoryBulk(transactions)
+        setAutoCatMap(autoCatMap)
+    }
+
     useEffect(() => {
         fetch("http://localhost:3000/api")
             .then(response => response.json())
@@ -28,11 +34,11 @@ const Inbox = () => {
     }, [])
 
     useEffect(() => {
-        const fetch = async () => {
-            const autoCatMap = await findAutoCategoryBulk(transactions)
-            setAutoCatMap(autoCatMap)
-        }
-        fetch()
+        // const fetch = async () => {
+        //     const autoCatMap = await findAutoCategoryBulk(transactions)
+        //     setAutoCatMap(autoCatMap)
+        // }
+        fetchAutoCatMap()
     }, [transactions])
 
     useEffect(() => {

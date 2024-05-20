@@ -22,18 +22,11 @@ const Sidebar = async () => {
         {
             text: 'מיון פעולות', link: '/inbox',
             icon: <SplitIcon />,
-            // <div className="relative inline-block">
-            //     <SplitIcon />
-            //     <span className="absolute top-[6px] left-[25px]">
-            //         <div className='bg-red-500 text-white font-medium rounded-full w-4 h-4 flex justify-center items-center text-center text-xs'>
-            //             {transactionsNumber}</div>
-            //     </span>
-            // </div>
             badge: transactionsNumber
 
         },
         { text: 'תובנות', link: '/insights', icon: <MicroscopeIcon /> },
-        { text: 'קטגוריות', link: '/categories', icon: <LayoutListIcon /> },
+        { text: 'פילטרים', link: '/filters', icon: <LayoutListIcon /> },
         { text: 'העלאת קובץ', link: '/upload', icon: <UploadIcon /> }
     ];
 

@@ -4,6 +4,7 @@ import '../globals.css';
 import Header from '@/components/shared/Header';
 import Footer from '@/Footer';
 import Sidebar from '@/components/shared/Sidebar';
+import { Toaster } from '@/components/ui/toaster';
 
 const poppins = Poppins({
     subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-poppins'
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <body className="flex h-screen ">
                 <Sidebar />
                 <div className="flex-1 max-w-full mx-auto px-20 py-10">{children}</div>
+                <Toaster />
             </body>
         </html>
     );

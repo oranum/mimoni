@@ -11,7 +11,7 @@ export type IFilterRow = {
 export type ICategoryFilter = {
     category: ICategory;
     targetType: string;
-    filters: IFilterRow[];
+    filterRows: IFilterRow[];
 }
 
 

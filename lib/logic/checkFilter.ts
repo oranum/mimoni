@@ -3,8 +3,8 @@ import { ITransaction } from "../database/models/transaction.model"
 
 
 const checkFilter = (filter: ICategoryFilter, transaction: ITransaction) => {
-    for (const filterLine of filter.filters) {
-        if (!checkFilterLine(filterLine, transaction)) {
+    for (const filterRow of filter.filterRows) {
+        if (!checkFilterLine(filterRow, transaction)) {
             return false
         }
     }
