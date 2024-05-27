@@ -2,7 +2,6 @@
 import { Filter } from "mongodb";
 import { connectToDatabase } from "../database";
 import { ITransaction } from "../database/models/transaction.model";
-import { Query } from "mongoose";
 
 
 export const getTransactions = async (monthsToGet?: number, onlyApproved?: boolean, onlyNotIgnored?: boolean, query?: Filter<ITransaction>) => {
@@ -23,6 +22,7 @@ export const getTransactions = async (monthsToGet?: number, onlyApproved?: boole
                 $gte: fromDate,
                 $lt: today
             }
+
         }
         if (onlyApproved) {
             query._isApproved = { $eq: true }
@@ -33,12 +33,10 @@ export const getTransactions = async (monthsToGet?: number, onlyApproved?: boole
 
         const transactions = await collection.find(query).toArray();
 
-        console.log(query)
         console.log('Transactions fetched successfully!');
         console.log("found " + transactions.length + " transactions")
 
-
-        return transactions;
+        return JSON.parse(JSON.stringify(transactions));
 
     } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -46,14 +44,9 @@ export const getTransactions = async (monthsToGet?: number, onlyApproved?: boole
     }
 }
 
-export const updateTransaction = async (transaction: ITransaction) => {
+export const updateTransactionAction = async (transaction: ITransaction) => {
 
     try {
-        console.log('transaction to be updated:')
-        console.log(transaction)
-        // const transaction = await JSON.parse(transactionJSON);
-
-
         const mongoose = await connectToDatabase();
         console.log('Connected to the database');
         const collection = mongoose.connection.collection<ITransaction>('transactions');
@@ -89,12 +82,13 @@ export const updateTransactionField = async (value: any, hash: string, field: st
 
 export const getNumberOfInboxTransactions = async () => {
     try {
+        console.log("Fetching number of inbox transactions from the database")
         const mongoose = await connectToDatabase();
         const collection = mongoose.connection.collection<ITransaction>('transactions');
         const query = { _isApproved: false }
         const numberOfInboxTransactions = await collection.countDocuments(query);
-        console.log('Number of inbox transactions fetched successfully!');
-        return numberOfInboxTransactions;
+        console.log('Number of inbox transactions fetched successfully!' + numberOfInboxTransactions);
+        return numberOfInboxTransactions
 
     } catch (error) {
         console.error('Error fetching number of inbox transactions:', error);

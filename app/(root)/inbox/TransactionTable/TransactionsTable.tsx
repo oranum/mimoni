@@ -23,12 +23,11 @@ import {
 } from "@/components/ui/table"
 import { ITransaction } from "@/lib/database/models/transaction.model"
 import { useEffect, useState } from "react"
-import { set } from "mongoose"
-import { updateTransactionApi } from "@/app/api/route"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ICategory } from "@/lib/database/models/category.model"
-import { updateTransaction, updateTransactionField } from "@/lib/actions/transactions.actions"
+import useUpdateTransaction from "@/lib/query-hooks/Transactions"
+import { useToast } from "@/components/ui/use-toast"
 
 
 declare module '@tanstack/table-core' {
@@ -65,7 +64,7 @@ interface DataTableProps<TData, TValue> {
     columns: ColumnDef<ITransaction, TValue>[]
     transactions: ITransaction[]
     autoCatMap: Map<string, ICategory | null>
-    setData: React.Dispatch<React.SetStateAction<ITransaction[]>>
+    // setData: React.Dispatch<React.SetStateAction<ITransaction[]>>
     categoryList: string[]
 }
 
@@ -75,11 +74,11 @@ export function TransactionsTable<TData, TValue>({
     transactions,
     autoCatMap,
     categoryList,
-    setData,
+    // setData,
 }: DataTableProps<TData, TValue>) {
-
+    const { toast } = useToast()
     const [rowSelection, setRowSelection] = useState({})
-
+    const { mutate: server_SetTransactions, isError } = useUpdateTransaction()
     const table = useReactTable({
         data: transactions,
         columns,
@@ -97,30 +96,40 @@ export function TransactionsTable<TData, TValue>({
                 "_calibratedDate": false,
             }
         },
-        meta: {
+        meta:
+        {
+            //     updateData: (row, columnId, value) => {
+            //         if (row.getValue('hash') === undefined) {
+            //             console.log(row)
+            //         }
+            //         const rowHash = row.getValue('hash') as string
+            //         setData(oldArray => oldArray.map((row) => {
+            //             if (row.hash === rowHash) {
+
+            //                 return {
+            //                     ...row,
+            //                     [columnId]: value,
+            //                 }
+            //             }
+            //             return row
+            //         }))
+            //         // const updatedRow: ITransaction | undefined = { ...row.original, [columnId]: value }
+            //         // console.log(updatedRow._calibratedDate)
+            //         // updateTransaction(updatedRow)
+            //         updateTransactionField(value, rowHash, columnId)
+            //     },
             updateData: (row, columnId, value) => {
                 if (row.getValue('hash') === undefined) {
                     console.log(row)
                 }
-                const rowHash = row.getValue('hash') as string
-                setData(oldArray => oldArray.map((row) => {
-                    if (row.hash === rowHash) {
+                const updatedRow: ITransaction = { ...row.original, [columnId]: value }
+                server_SetTransactions(updatedRow)
 
-                        return {
-                            ...row,
-                            [columnId]: value,
-                        }
-                    }
-                    return row
-                }))
-                // const updatedRow: ITransaction | undefined = { ...row.original, [columnId]: value }
-                // console.log(updatedRow._calibratedDate)
-                // updateTransaction(updatedRow)
-                updateTransactionField(value, rowHash, columnId)
             },
             autoCatMap,
             categoryList,
         },
+
 
     })
 
@@ -195,3 +204,7 @@ export function TransactionsTable<TData, TValue>({
     )
 
 }
+
+
+
+

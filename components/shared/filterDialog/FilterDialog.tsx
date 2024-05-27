@@ -24,7 +24,6 @@ import { setCategoryFilter } from "@/lib/actions/filters.actions"
 import checkFilter from "@/lib/logic/checkFilter"
 import ComboboxWithAdd from "@/components/ui/combobox-with-add"
 import { de } from "date-fns/locale"
-
 const MONTHS_TO_GET_EXAMPLE_TRANSACTIONS = 6
 
 export interface IFilterRowId extends IFilterRow {
@@ -39,9 +38,10 @@ type FilterDialogProps = {
     defaultTransaction?: ITransaction,
     defaultFilter?: ICategoryFilter,
     children?: React.ReactNode,
+    refreshAutoCatMap: () => void
 }
 
-const FilterDialog = ({ children, defaultFilter }: FilterDialogProps) => {
+const FilterDialog = ({ children, defaultFilter, refreshAutoCatMap }: FilterDialogProps) => {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
@@ -52,7 +52,7 @@ const FilterDialog = ({ children, defaultFilter }: FilterDialogProps) => {
             </DialogTrigger>
 
             <DialogContent className="min-w-[850px] px-10 h-[90%] flex flex-col gap-10 justify-between">
-                <FilterDialogContent defaultFilter={defaultFilter} /> {/*must be in a different component so it resets all of the states of the fields once the dialog is closed */}
+                <FilterDialogContent defaultFilter={defaultFilter} refreshAutoCatMap={refreshAutoCatMap} /> {/*must be in a different component so it resets all of the states of the fields once the dialog is closed */}
             </DialogContent>
         </Dialog>
     )
@@ -61,25 +61,26 @@ const FilterDialog = ({ children, defaultFilter }: FilterDialogProps) => {
 
 type FilterDialogContentProps = {
     defaultFilter?: ICategoryFilter
+    refreshAutoCatMap: () => void
 }
 
-const FilterDialogContent = ({ defaultFilter }: FilterDialogContentProps) => {
+const FilterDialogContent = ({ defaultFilter, refreshAutoCatMap }: FilterDialogContentProps) => {
     console.log(defaultFilter?.filterRows)
     const [pastTransactions, setPastTransactions] = useState<ITransaction[]>([])
     const [categoryList, setCategoryList] = useState<string[]>([])
-    useEffect(() => {
-        async function getPastTransactions() {
-            const pastTransactions = await getTransactions(MONTHS_TO_GET_EXAMPLE_TRANSACTIONS)
-            setPastTransactions(pastTransactions)
-        }
-        getPastTransactions()
-    }, [])
     useEffect(() => {
         async function fetch() {
             const categoryList = await getCategoryList(true)
             setCategoryList(categoryList as string[])
         }
         fetch()
+    }, [])
+    useEffect(() => {
+        async function getPastTransactions() {
+            const pastTransactions = await getTransactions(MONTHS_TO_GET_EXAMPLE_TRANSACTIONS)
+            setPastTransactions(pastTransactions)
+        }
+        getPastTransactions()
     }, [])
 
     const defaultRows = (defaultFilter?.filterRows?.map(row => ({ ...row, rowId: randomID() })) || [{ rowId: randomID(), field: 'כותרת', operator: '', valuePrimary: '' }]) as IFilterRowId[]
@@ -104,6 +105,7 @@ const FilterDialogContent = ({ defaultFilter }: FilterDialogContentProps) => {
     }
     function submitHandler() {
         setCategoryFilter(newCategoryFilter);
+        refreshAutoCatMap()
     }
 
     const filteredPastTransactions = newCategoryFilter.filterRows.length ?

@@ -85,7 +85,7 @@ export const columns: ColumnDef<ITransaction>[] = [
                                 onSelect={handleSelectDate}
                                 locale={he}
                                 className="rounded-md border shadow"
-                            />
+                                />
                         </PopoverContent>
                     </Popover>
                 </div >

@@ -1,12 +1,14 @@
-'no store'
+'use client'
 import logo from '../../assets/images/logoipsum.svg'
 import Link from 'next/link';
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { HomeIcon, LayoutListIcon, MenuIcon, Microscope, MicroscopeIcon, SearchIcon, SplitIcon, UploadIcon } from 'lucide-react';
+import { CloudHail, HomeIcon, LayoutListIcon, MenuIcon, Microscope, MicroscopeIcon, SearchIcon, SplitIcon, UploadIcon } from 'lucide-react';
 import avatar from '../../assets/images/avatar.png';
 import { getNumberOfInboxTransactions } from '@/lib/actions/transactions.actions';
 import { Badge, badgeVariants } from '../ui/badge';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useGetTransactions } from '@/lib/query-hooks/Transactions';
 
 const ItemBadge = ({ value }: { value: number }) => {
     return (
@@ -15,15 +17,17 @@ const ItemBadge = ({ value }: { value: number }) => {
     )
 }
 
-const Sidebar = async () => {
-    const transactionsNumber = await getNumberOfInboxTransactions();
+const Sidebar = () => {
+
+    const { transactions } = useGetTransactions()
+
+    // console.log('transactionsNumber', transactionsNumber)
     const menuItems = [
         { text: 'דף הבית', link: '/dashboard', icon: <HomeIcon /> },
         {
             text: 'מיון פעולות', link: '/inbox',
             icon: <SplitIcon />,
-            badge: transactionsNumber
-
+            badge: transactions?.filter(t => !t._isApproved).length || ''
         },
         { text: 'תובנות', link: '/insights', icon: <MicroscopeIcon /> },
         { text: 'פילטרים', link: '/filters', icon: <LayoutListIcon /> },
