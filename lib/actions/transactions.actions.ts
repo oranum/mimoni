@@ -2,16 +2,18 @@
 import { Filter } from "mongodb";
 import { connectToDatabase } from "../database";
 import { ITransaction } from "../database/models/transaction.model";
+import { get } from "http";
+
+
+const getCollection = async () => {
+    const mongoose = await connectToDatabase();
+    return mongoose.connection.collection<ITransaction>('transactions');
+}
 
 
 export const getTransactions = async (monthsToGet?: number, onlyApproved?: boolean, onlyNotIgnored?: boolean, query?: Filter<ITransaction>) => {
     try {
-        console.log("Fetching transactions from the database");
-        const mongoose = await connectToDatabase();
-        console.log("Connected to the database");
-        const collection = mongoose.connection.collection<ITransaction>('transactions');
-
-
+        const collection = await getCollection();
         query = query || {};
         if (monthsToGet) {
             const today = new Date();
@@ -45,11 +47,9 @@ export const getTransactions = async (monthsToGet?: number, onlyApproved?: boole
 }
 
 export const updateTransactionAction = async (transaction: ITransaction) => {
-
     try {
         const mongoose = await connectToDatabase();
-        console.log('Connected to the database');
-        const collection = mongoose.connection.collection<ITransaction>('transactions');
+        const collection = await getCollection();
         const { _id, ...transactionWithoutId } = transaction;
         const objectId = new mongoose.Types.ObjectId(transaction._id) // Convert objectId to string
         //@ts-ignore - updateOne method _id property causing conflict but this is the only way it works on the db
@@ -63,11 +63,7 @@ export const updateTransactionAction = async (transaction: ITransaction) => {
 
 export const updateTransactionField = async (value: any, hash: string, field: string) => {
     try {
-        console.log('transaction field to be updated:')
-        console.log(field)
-        console.log(value)
-        const mongoose = await connectToDatabase();
-        const collection = mongoose.connection.collection<ITransaction>('transactions');
+        const collection = await getCollection();
         //@ts-ignore - updateOne method _id property causing conflict but this is the only way it works on the db
         const result = await collection.updateOne({ hash }, { $set: { [field]: value } });
         result.matchedCount === 1 ? console.log('Transaction updated successfully!') : console.log('****Transaction not found****');
@@ -82,9 +78,8 @@ export const updateTransactionField = async (value: any, hash: string, field: st
 
 export const getNumberOfInboxTransactions = async () => {
     try {
-        console.log("Fetching number of inbox transactions from the database")
-        const mongoose = await connectToDatabase();
-        const collection = mongoose.connection.collection<ITransaction>('transactions');
+
+        const collection = await getCollection();
         const query = { _isApproved: false }
         const numberOfInboxTransactions = await collection.countDocuments(query);
         console.log('Number of inbox transactions fetched successfully!' + numberOfInboxTransactions);

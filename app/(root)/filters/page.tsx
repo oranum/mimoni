@@ -10,17 +10,13 @@ import FilterDialog from '@/components/shared/filterDialog/FilterDialog'
 import { Button } from '@/components/ui/button'
 import { getAllFilters } from '@/lib/actions/filters.actions'
 import { ICategoryFilter } from '@/lib/database/models/categoryFilter.model'
+import { useGetFilters } from '@/lib/query-hooks/Filters'
 
 const FiltersManager = () => {
 
     const [search, setSearch] = useState<string>('')
-    const [filters, setFilters] = useState<ICategoryFilter[]>([])
 
-    useEffect(() => {
-        getAllFilters().then((filters) => {
-            setFilters(filters)
-        })
-    }, [])
+    const { filters } = useGetFilters()
 
 
 
@@ -39,9 +35,9 @@ const FiltersManager = () => {
         <div className='container max-w-[600px]'>
             <Input value={search} onChange={((e) => setSearch(e.target.value))} placeholder='חפש קטגוריה' />
             <div className='flex flex-col'>
-                {filters.map(filter => {
+                {filters.filter(filter => filter.category.name.includes(search)).map(filter => {
                     return (
-                        <FilterDialog defaultFilter={filter}>
+                        <FilterDialog defaultFilter={filter} refreshAutoCatMap={() => { }}  >
                             <FilterRow filter={filter} />
                         </FilterDialog>
                     )

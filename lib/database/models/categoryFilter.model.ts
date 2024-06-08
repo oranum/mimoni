@@ -9,6 +9,7 @@ export type IFilterRow = {
 }
 
 export type ICategoryFilter = {
+    _id?: string;
     category: ICategory;
     targetType: string;
     filterRows: IFilterRow[];
@@ -16,6 +17,7 @@ export type ICategoryFilter = {
 
 
 const CategoryFilterSchema = new Schema({
+    _id: { type: String, required: true },
     category: { type: String, required: true },
     filters: [
         {

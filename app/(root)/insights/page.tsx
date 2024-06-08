@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { SavedSearchesDropdown } from './components/SavedSearchesDropdown'
 import Dropdown from '@/components/shared/filterDialog/Dropdown'
 import FilterRow from '@/components/shared/filterDialog/FilterRow'
+import { TransactionsTable } from '../inbox/TransactionTable/TransactionsTable'
 
 
 
@@ -27,7 +28,7 @@ const Insights = () => {
                 } />
                 <
                  */}
-               
+
             </div >
 
         </>

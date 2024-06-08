@@ -1,4 +1,5 @@
 import { ObjectId, Schema, model, models } from "mongoose";
+import { ICategory } from "./category.model";
 
 export type ITransaction = {
     type: string;
@@ -19,7 +20,7 @@ export type ITransaction = {
     _calibratedDate: Date;
     _convertedILSAmount?: number;
     _isProcessed: boolean;
-    _category?: { _id: string, name: string },
+    _category?: ICategory,
     _note?: string;
     _tags?: string[];
     _lastUpdated: Date;

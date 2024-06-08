@@ -1,6 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
 export type ICategory = {
+    _id?: string;
     userId?: string;
     name: string;
     ignore: boolean;

@@ -10,11 +10,11 @@ let cached = global as any
 
 export const connectToDatabase = async (): Promise<mongoose> => {
     const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://oranlimony:Burgata1@cluster0.russcec.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-    console.log("Starting connection to database");
+    //console.log("Starting connection to database");
 
 
     if (cached.conn) {
-        console.log("Found cached connection");
+        //console.log("Found cached connection");
         return cached.conn;
     }
 

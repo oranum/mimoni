@@ -3,11 +3,8 @@ import logo from '../../assets/images/logoipsum.svg'
 import Link from 'next/link';
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { CloudHail, HomeIcon, LayoutListIcon, MenuIcon, Microscope, MicroscopeIcon, SearchIcon, SplitIcon, UploadIcon } from 'lucide-react';
+import { HomeIcon, LayoutListIcon, MenuIcon, Microscope, MicroscopeIcon, SearchIcon, SplitIcon, UploadIcon } from 'lucide-react';
 import avatar from '../../assets/images/avatar.png';
-import { getNumberOfInboxTransactions } from '@/lib/actions/transactions.actions';
-import { Badge, badgeVariants } from '../ui/badge';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useGetTransactions } from '@/lib/query-hooks/Transactions';
 
 const ItemBadge = ({ value }: { value: number }) => {

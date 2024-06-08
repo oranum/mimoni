@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState, useEffect } from "react"
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
 
 import { cn } from "@/lib/utils"
@@ -19,80 +19,92 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { Separator } from "@radix-ui/react-dropdown-menu"
-import { createCategoryAction } from "@/lib/actions/categories.actions"
 
 
 
-type ComboboxWithAddProps = {
-    categoryName: string
-    items: string[]
-    setValue: (value: string) => void
-    onAdd: (value: string) => void
+type ComboboxWithAddProps<T> = {
+    selected: T | undefined
+    items: NonNullable<T[]>
+    setSelected: (value: T) => void
+    createAndAddFromString: (string: string) => T
     placeholder?: string
+    extractStringFn: (item: T) => string
 
 }
-
-export default function ComboboxWithAdd({ categoryName, setValue, items, onAdd, placeholder }: ComboboxWithAddProps) {
-    const [open, setOpen] = React.useState(false)
-    const [query, setQuery] = React.useState("")
-    const onCreate = (query: string) => {
-        setValue(query)
-        setOpen(false)
-        createCategoryAction({ name: query, ignore: false })
+export default function ComboboxWithAdd<T>({ selected, setSelected, items, createAndAddFromString, placeholder, extractStringFn }: ComboboxWithAddProps<T>) {
+    const [open, setOpen] = useState(false)
+    const [query, setQuery] = useState("")
+    const selectedString = selected ? extractStringFn(selected) : ""
+    useEffect(() => {
+        console.log("loaded dialog")
+        return () => {
+            console.log("unloaded dialog")
+        }
     }
+        , [])
 
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={(set) => {
+            console.log("chaged dialog open")
+            setOpen(set)
+        }}
+        >
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={`w-full justify-between text-black ${!categoryName && "text-cyan-700"}`}
+                    className={`w-full justify-between text-black ${!selected && "text-cyan-700" && "border-red-200"}`}
                 >
-                    {categoryName || placeholder || "בחר מהרשימה..."}
+                    {selectedString || placeholder || ""}
                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0">
                 <Command>
-                    <CommandInput value={query} onValueChange={(query) => setQuery(query)} placeholder="Search framework..." className="h-9" />
-
+                    <CommandInput value={query} onValueChange={(query) => setQuery(query)} placeholder="חפש קטגוריה" className="h-9" />
                     <CommandGroup>
+                        {items.map((item) => {
+                            const itemString = extractStringFn(item)
+                            return (
+                                <CommandItem
+                                    key={itemString}
+                                    value={itemString}
+                                    onSelect={
+                                        () => {
+                                            setSelected(item)
+                                            setOpen(false)
+                                        }}>
 
-                        {items.map((item) => (
-                            <CommandItem
-                                key={item}
-                                value={item}
-                                onSelect={(currentValue) => {
-                                    setValue(currentValue === categoryName ? "" : currentValue)
-                                    setOpen(false)
-                                }}
-                            >
+                                    {itemString}
+                                    <CheckIcon
+                                        className={cn(
+                                            "ml-auto h-4 w-4",
+                                            selected === item ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                </CommandItem>
+                            )
+                        })}
 
-                                {item}
-                                <CheckIcon
-                                    className={cn(
-                                        "ml-auto h-4 w-4",
-                                        categoryName === item ? "opacity-100" : "opacity-0"
-                                    )}
-                                />
-                            </CommandItem>
-
-                        ))}
                         <CommandSeparator />
-                        {query && (
-                            <CommandItem onSelect={() => {
-                                onCreate(query)
-                                setQuery('')
-                            }}
-                            >צור קטגוריה:  {query}</CommandItem>)}
-
+                        {query &&
+                            (
+                                <>
+                                    <CommandItem onSelect={() => {
+                                        const createdItem = createAndAddFromString(query)
+                                        setSelected(createdItem)
+                                        setQuery('')
+                                        setOpen(false)
+                                    }}
+                                    >צור קטגוריה:  {query}</CommandItem>
+                                </>
+                            )
+                        }
                     </CommandGroup>
                 </Command>
             </PopoverContent>
-        </Popover>
+        </Popover >
     )
 }

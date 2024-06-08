@@ -10,6 +10,7 @@ import { getTransactions } from "@/lib/actions/transactions.actions"
 import { ITransaction } from "@/lib/database/models/transaction.model"
 import { set } from "mongoose"
 import MonthSelector from "@/components/shared/MonthSelector"
+import { useGetTransactions, useSetTransaction } from "@/lib/query-hooks/Transactions"
 
 
 const processDataForChart = (transactions: ITransaction[]): ChartData[] => {
@@ -52,7 +53,9 @@ const processDataForChart = (transactions: ITransaction[]): ChartData[] => {
 
 const Dashboard = () => {
     const [showBalance, setShowBalance] = useState(false)
-    const [transactions, setTransactions] = useState<ITransaction[]>([])
+
+    const { transactions } = useGetTransactions()
+    const { mutate: setTransactions } = useSetTransaction()
     const [selectedMonth, setSelectedMonth] = useState<Date>(new Date())
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
     const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)

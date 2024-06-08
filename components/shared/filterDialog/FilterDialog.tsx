@@ -19,11 +19,14 @@ import FilterRow from "./FilterRow"
 import { PlayCircleIcon, PlusCircleIcon, icons } from "lucide-react"
 import Dropdown from "./Dropdown"
 import { getTransactions } from "@/lib/actions/transactions.actions"
-import { getCategoryList } from "@/lib/actions/categories.actions"
 import { setCategoryFilter } from "@/lib/actions/filters.actions"
 import checkFilter from "@/lib/logic/checkFilter"
-import ComboboxWithAdd from "@/components/ui/combobox-with-add"
 import { de } from "date-fns/locale"
+import { useAddCategory, useGetCategories } from "@/lib/query-hooks/Categories"
+import { useQuery } from "@tanstack/react-query"
+import { useGetTransactions } from "@/lib/query-hooks/Transactions"
+import { ICategory } from "@/lib/database/models/category.model"
+import CategorySelector from "@/app/(root)/inbox/TransactionTable/table-components/categorySelector"
 const MONTHS_TO_GET_EXAMPLE_TRANSACTIONS = 6
 
 export interface IFilterRowId extends IFilterRow {
@@ -43,6 +46,7 @@ type FilterDialogProps = {
 
 const FilterDialog = ({ children, defaultFilter, refreshAutoCatMap }: FilterDialogProps) => {
     const [isOpen, setIsOpen] = useState(false)
+
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -65,33 +69,28 @@ type FilterDialogContentProps = {
 }
 
 const FilterDialogContent = ({ defaultFilter, refreshAutoCatMap }: FilterDialogContentProps) => {
-    console.log(defaultFilter?.filterRows)
-    const [pastTransactions, setPastTransactions] = useState<ITransaction[]>([])
-    const [categoryList, setCategoryList] = useState<string[]>([])
-    useEffect(() => {
-        async function fetch() {
-            const categoryList = await getCategoryList(true)
-            setCategoryList(categoryList as string[])
-        }
-        fetch()
-    }, [])
-    useEffect(() => {
-        async function getPastTransactions() {
-            const pastTransactions = await getTransactions(MONTHS_TO_GET_EXAMPLE_TRANSACTIONS)
-            setPastTransactions(pastTransactions)
-        }
-        getPastTransactions()
-    }, [])
+    const { categories, isFetched: isCategoryFetched } = useGetCategories()
+    const { mutate: addCategory } = useAddCategory()
+    const categoryList = categories.map(c => c.name)
+    const { transactions: pastTransactions } = useGetTransactions(MONTHS_TO_GET_EXAMPLE_TRANSACTIONS)
 
     const defaultRows = (defaultFilter?.filterRows?.map(row => ({ ...row, rowId: randomID() })) || [{ rowId: randomID(), field: 'כותרת', operator: '', valuePrimary: '' }]) as IFilterRowId[]
     const [filterRows, setFilterRows] = useState<IFilterRowId[]>(defaultRows)
     const [categoryName, setCategoryName] = useState<string>(defaultFilter?.category.name || '')
+    const [selectedCategory, setSelectedCategory] = useState<ICategory | undefined>(defaultFilter?.category)
     const [targetType, setTargetType] = useState<string>('פעולה')
+
 
     const newCategoryFilter: ICategoryFilter = {
         category: { name: categoryName, ignore: false },
         targetType,
         filterRows: filterRows
+    }
+
+    function createAndAddFromString(string: string): ICategory {
+        const newCategory: ICategory = { name: string, ignore: false }
+        addCategory(newCategory)
+        return newCategory
     }
 
     function setRowHandler(newRow: IFilterRowId) {
@@ -109,19 +108,31 @@ const FilterDialogContent = ({ defaultFilter, refreshAutoCatMap }: FilterDialogC
     }
 
     const filteredPastTransactions = newCategoryFilter.filterRows.length ?
-        pastTransactions.filter(transaction => {
+        pastTransactions?.filter(transaction => {
             const result = checkFilter(newCategoryFilter, transaction)
             return result
         }) : []
-
+    console.log(categoryList)
 
     const targetTypeList = ['פעולה', 'הוצאה', 'הכנסה']
 
     const CategoryTitleRow = () => {
+
+
+
         return (
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label className='text-left col-span-1'>הוסף את הקטגוריה</Label>
-                <ComboboxWithAdd categoryName={categoryName} items={categoryList} setValue={setCategoryName} onAdd={(value) => setCategoryName(value)} />
+
+                {<CategorySelector
+                    categories={categories}
+                    addCategory={addCategory}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    placeholder={"בחר קטגוריה"}
+                />
+                }
+
                 <div className="flex items-center gap-2">
                     <Label>לכל</Label>
                     <Dropdown items={targetTypeList} selected={targetType} setSelected={setTargetType} width="w-fit" />
@@ -154,12 +165,12 @@ const FilterDialogContent = ({ defaultFilter, refreshAutoCatMap }: FilterDialogC
             <DialogFooter className='h-[300px] flex-grow-0 flex-shrink-0'>
                 <div className='flex flex-col flex-grow-0 flex-shrink-0 justify-end w-full '>
                     <div className="border-t border-black my-4" />
-                    <span className='text-center'>נמצאו {filteredPastTransactions.length} תנועות</span>
+                    <span className='text-center'>נמצאו {filteredPastTransactions?.length || 0} תנועות</span>
                     <div className="w-full flex flex-col justify-center text-center gap-4 h-[200px] bg-slate-500 rounded-lg">
                         {/* <div className='w-full h-[200px] flex justify-center'> */}
                         <ul className=' w-full p-4 h-[200px] overflow-y-auto'>
 
-                            {filteredPastTransactions.map((transaction) => {
+                            {filteredPastTransactions?.map((transaction) => {
                                 return (
                                     <li key={transaction._id} className='flex justify-between border-b border-gray-300 py-2'>
                                         <span>{transaction.description}</span>
