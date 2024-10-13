@@ -16,7 +16,7 @@ const ItemBadge = ({ value }: { value: number }) => {
 
 const Sidebar = () => {
 
-    const { transactions } = useGetTransactions()
+    const { transactions } = useGetTransactions('pending')
 
     // console.log('transactionsNumber', transactionsNumber)
     const menuItems = [
@@ -24,7 +24,7 @@ const Sidebar = () => {
         {
             text: 'מיון פעולות', link: '/inbox',
             icon: <SplitIcon />,
-            badge: transactions?.filter(t => !t._isApproved).length || ''
+            badge: transactions?.length || ''
         },
         { text: 'תובנות', link: '/insights', icon: <MicroscopeIcon /> },
         { text: 'פילטרים', link: '/filters', icon: <LayoutListIcon /> },

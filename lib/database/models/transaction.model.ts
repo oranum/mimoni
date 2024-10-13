@@ -1,5 +1,5 @@
-import { ObjectId, Schema, model, models } from "mongoose";
-import { ICategory } from "./category.model";
+import { ObjectId, Schema, model, models } from 'mongoose';
+import { ICategory } from './category.model';
 
 export type ITransaction = {
     type: string;
@@ -20,15 +20,17 @@ export type ITransaction = {
     _calibratedDate: Date;
     _convertedILSAmount?: number;
     _isProcessed: boolean;
-    _category?: ICategory,
+    _category?: ICategory;
+    _type?: 'include' | 'ignore' | 'fixed' | 'dynamic' | 'income';
     _note?: string;
     _tags?: string[];
     _lastUpdated: Date;
     _isAutoCategory?: boolean;
     _ignore: boolean;
+    _isParent: boolean;
+    _childrenIds: ObjectId[];
     _isApproved: boolean;
-}
-
+};
 
 const TransactionSchema = new Schema({
     type: { type: String },
@@ -48,15 +50,18 @@ const TransactionSchema = new Schema({
     _calibratedDate: { type: Date },
     _convertedILSAmount: { type: Number },
     _isProcessed: { type: Boolean, required: true, default: false },
-    _category: { type: Schema.Types.ObjectId, ref: "Category" },
+    _category: { type: Schema.Types.ObjectId, ref: 'Category' },
+    _type: { type: String, enum: ['include', 'ignore', 'fixed', 'dynamic', 'income'], required: true, default: 'include' },
     _note: { type: String },
     _tags: { type: [String] },
     _lastUpdated: { type: Date },
     _isAutoCategory: { type: Boolean },
     _ignore: { type: Boolean, required: true, default: false },
-    _isApproved: { type: Boolean, required: true, default: false }
+    _isParent: { type: Boolean, required: true, default: false },
+    _childrenIds: { type: [Schema.Types.ObjectId], default: [] },
+    _isApproved: { type: Boolean, required: true, default: false },
 });
 
-const Transaction = models.Transaction || model("Transaction", TransactionSchema);
+const Transaction = models.Transaction || model('Transaction', TransactionSchema);
 
 export default Transaction;

@@ -1,10 +1,11 @@
 import { ICategoryFilter, IFilterRow } from "../database/models/categoryFilter.model"
+import { IOverlayRule, IRuleRow } from "../database/models/overlayRule.model"
 import { ITransaction } from "../database/models/transaction.model"
 
 
-const checkFilter = (filter: ICategoryFilter, transaction: ITransaction) => {
-    for (const filterRow of filter.filterRows) {
-        if (!checkFilterLine(filterRow, transaction)) {
+const checkOverlayRule = (rule: IOverlayRule, transaction: ITransaction) => {
+    for (const ruleRow of rule.ruleRows) {
+        if (!checkFilterLine(ruleRow, transaction)) {
             return false
         }
     }
@@ -12,7 +13,7 @@ const checkFilter = (filter: ICategoryFilter, transaction: ITransaction) => {
 }
 
 
-const checkFilterLine = ({ field, operator, valuePrimary, valueSecondary }: IFilterRow, transaction: ITransaction) => {
+const checkFilterLine = ({ field, operator, valuePrimary, valueSecondary }: IRuleRow, transaction: ITransaction) => {
     if (!field || !operator || !valuePrimary) {
         return false
     }
@@ -67,4 +68,4 @@ const checkFilterLine = ({ field, operator, valuePrimary, valueSecondary }: IFil
 }
 
 
-export default checkFilter
+export default checkOverlayRule

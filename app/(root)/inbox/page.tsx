@@ -1,70 +1,64 @@
-'use client'
+'use client';
 
-import { use, useEffect, useState, useTransition } from 'react'
-import { columns } from './TransactionTable/columns'
-import { TransactionsTable } from './TransactionTable/TransactionsTable'
-import { getTransactions } from '@/lib/actions/transactions.actions'
-import { ITransaction } from '@/lib/database/models/transaction.model'
-import { connectToDatabase } from '@/lib/database'
-import { Search } from 'lucide-react'
-import { calcAutoCatMapBulk, getCategoryList } from '@/lib/actions/categories.actions'
-import { ICategory } from '@/lib/database/models/category.model'
-import { set } from 'mongoose'
-import FilterDialog from '@/components/shared/filterDialog/FilterDialog'
-import { Button } from '@/components/ui/button'
-import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
-import { WithId } from 'mongodb'
-import { useGetTransactions } from '@/lib/query-hooks/Transactions'
-import { useToast } from '@/components/ui/use-toast'
-import { useGetCategories } from '@/lib/query-hooks/Categories'
-import { useGetFilters } from '@/lib/query-hooks/Filters'
-import { ICategoryFilter } from '@/lib/database/models/categoryFilter.model'
-import checkFilter from '@/lib/logic/checkFilter'
-
+import { use, useEffect, useState, useTransition } from 'react';
+import { columns } from './TransactionTable/columns';
+import { TransactionsTable } from './TransactionTable/TransactionsTable';
+import { ITransaction } from '@/lib/database/models/transaction.model';
+import { ICategory } from '@/lib/database/models/category.model';
+import { set } from 'mongoose';
+import RuleDialog from '@/components/shared/filterDialog/FilterDialog';
+import { Button } from '@/components/ui/button';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { WithId } from 'mongodb';
+import { useGetTransactions, useTransactions } from '@/lib/query-hooks/Transactions';
+import { useToast } from '@/components/ui/use-toast';
+import { useGetCategories } from '@/lib/query-hooks/Categories';
+import { useGetOverlayRules } from '@/lib/query-hooks/OverlayRules';
+import { ICategoryFilter } from '@/lib/database/models/categoryFilter.model';
+import checkRule from '@/lib/logic/checkOverlayRule';
+import { IOverlayRule } from '@/lib/database/models/overlayRule.model';
 
 const Inbox = () => {
+    //TODO:
+    //creagte a useeffect that tracks the change in the rules db, using usequery. useGetOverlayRules
+    //Then, it will reonvoke the calculation of the ruels map
 
-
-
-    const calcAutoCategory = (transaction: ITransaction, filtersArray?: ICategoryFilter[]) => {
-        filtersArray = filtersArray || useGetFilters().filters;
-        for (const filter of filtersArray) {
-            const result = checkFilter(filter, transaction);
+    const calcAutoCategory = (transaction: ITransaction, rulesArray?: IOverlayRule[]) => {
+        rulesArray = rulesArray || useGetOverlayRules().rules;
+        for (const rule of rulesArray) {
+            const result = checkRule(rule, transaction);
             if (result) {
-                return filter.category;
+                return rule.overlay._category;
             }
         }
         return null;
-    }
+    };
 
-
-    const calcAutoCatMap = (transactions: ITransaction[], filters: ICategoryFilter[]) => {
-        let results = new Map<string, ICategory | undefined>()
+    const calcAutoCatMap = (transactions: ITransaction[], rules: IOverlayRule[]) => {
+        let results = new Map<string, ICategory | undefined>();
         for (const transaction of transactions) {
-            for (const filter of filters) {
-                const result = checkFilter(filter, transaction);
+            for (const rule of rules) {
+                const result = checkRule(rule, transaction);
                 if (result) {
-                    results.set(transaction.hash, filter.category);
+                    results.set(transaction.hash, rule.overlay._category);
                     break;
                 }
-
             }
         }
         return results;
-    }
+    };
 
-    const queryClient = useQueryClient()
-
+    const queryClient = useQueryClient();
 
     // const [transactions, setTransactions] = useState<ITransaction[]>([])
 
-    const { transactions } = useGetTransactions()
-    const { filters } = useGetFilters()
-    const [autoCatMap, setAutoCatMap] = useState<Map<string, ICategory | undefined>>(new Map())
+    const { transactions } = useGetTransactions();
+    // const [transactions, setTransactions] = useTransactions();
+    const { rules } = useGetOverlayRules();
+    const [autoCatMap, setAutoCatMap] = useState<Map<string, ICategory | undefined>>(new Map());
     // const [categoryList, setCategoryList] = useState<string[]>([])
 
-
-    const { categories } = useGetCategories()
+    const { categories } = useGetCategories();
 
     // const calcAutoCatMap = () => {
     //     if (!transactions) return new Map<string, ICategory | null>()
@@ -72,40 +66,40 @@ const Inbox = () => {
     //     return autoCatMap
     // }
 
-    useEffect(() => {
-        setAutoCatMap(calcAutoCatMap(transactions, filters))
-    }, [filters])
+    // useEffect(() => {
+    //     setAutoCatMap(calcAutoCatMap(transactions, filters))
+    // }, [filters])
 
-    if (!transactions) return <div>Loading...</div>
+    if (!transactions) return <div>Loading...</div>;
 
-    transactions.forEach(transaction => {
-        transaction._category = transaction._category || autoCatMap.get(transaction.hash)
-    })
+    transactions.forEach((transaction) => {
+        transaction._category = transaction._category || autoCatMap.get(transaction.hash);
+    });
 
-
+    const [data, setData] = useState<ITransaction[]>(
+        transactions.sort((a, b) => (b._calibratedDate as any) - (a._calibratedDate as any)).filter((row) => !row._isApproved)
+    );
     if (transactions.length > 0) {
         return (
             <>
                 {/*  <div className="flex flex-col h-full"> */}
-                <h1 className='text-3xl font-bold py-6 px-4'>מיון פעולות</h1>
+                <h1 className="text-3xl font-bold py-6 px-4">מיון פעולות</h1>
                 {/* <div className='flex-1 overflow-y-auto' > */}
-                <FilterDialog refreshAutoCatMap={() => { }}>
+                <RuleDialog refreshOverlayMap={() => {}}>
                     <Button variant="outline">קטגוריה אוטומטית</Button>
-                </FilterDialog>
+                </RuleDialog>
                 <TransactionsTable
                     columns={columns}
                     autoCatMap={autoCatMap}
-                    transactions={transactions.sort((a, b) => ((b._calibratedDate as any) - (a._calibratedDate as any))).filter(row => !row._isApproved)}
-                    // setData={setTransactions}
+                    transactions={transactions.sort((a, b) => (b._calibratedDate as any) - (a._calibratedDate as any)).filter((row) => !row._isApproved)}
+                    setData={setData}
                     categories={categories}
                 />
             </>
-        )
-
+        );
     }
 
+    return <div>Loading...</div>;
+};
 
-    return <div>Loading...</div>
-}
-
-export default Inbox
+export default Inbox;

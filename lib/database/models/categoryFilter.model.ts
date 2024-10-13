@@ -10,6 +10,7 @@ export type IFilterRow = {
 
 export type ICategoryFilter = {
     _id?: string;
+    //overlay: string;
     category: ICategory;
     targetType: string;
     filterRows: IFilterRow[];

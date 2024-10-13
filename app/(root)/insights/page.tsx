@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { HeartIcon } from 'lucide-react'
 import { useState } from 'react'
 import { SavedSearchesDropdown } from './components/SavedSearchesDropdown'
-import Dropdown from '@/components/shared/filterDialog/Dropdown'
+import Dropdown from '@/components/shared/Dropdown'
 import FilterRow from '@/components/shared/filterDialog/FilterRow'
 import { TransactionsTable } from '../inbox/TransactionTable/TransactionsTable'
 

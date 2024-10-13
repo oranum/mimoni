@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useReducer } from 'react'
-import Dropdown from './Dropdown'
+import Dropdown from '../Dropdown'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'

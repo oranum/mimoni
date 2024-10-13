@@ -1,21 +1,21 @@
 'use server'
-import { connectToDatabase } from "../database";
+import { connectToDatabase, getCollection } from "../database";
 import { ICategory } from "../database/models/category.model";
 import { ICategoryFilter } from "../database/models/categoryFilter.model";
 import { ITransaction } from "../database/models/transaction.model";
-import checkFilter from "../logic/checkFilter";
-import { useGetFilters } from "../query-hooks/Filters";
-import { getAllFilters } from "./filters.actions";
+import checkRule from "../logic/checkOverlayRule";
+import { useGetOverlayRules } from "../query-hooks/OverlayRules";
+import { getAllOverlayRules } from "./filters.actions";
 
-const getCollection = async () => {
-    const mongoose = await connectToDatabase();
-    return mongoose.connection.collection<ICategory>('categories');
-}
+// const getCollection = async () => {
+//     const mongoose = await connectToDatabase();
+//     return mongoose.connection.collection<ICategory>('categories');
+// }
 
 
 export const getCategoryList = async (asString = false) => {
     try {
-        const collection = await getCollection();
+        const collection = await getCollection<ICategory>('categories');
 
         const categories = (await collection.find().toArray())
         const withoutId: ICategory[] = categories.map((category) => {
@@ -36,7 +36,7 @@ export const getCategoryList = async (asString = false) => {
 
 export const createCategoryAction = async (category: ICategory) => {
     try {
-        const collection = await getCollection();
+        const collection = await getCollection<ICategory>('categories');
         const result = await collection.insertOne(category);
         console.log('Category created successfully!');
         return result;
@@ -47,26 +47,3 @@ export const createCategoryAction = async (category: ICategory) => {
     }
 }
 
-
-export const calcAutoCategory = (transaction: ITransaction, filtersArray?: ICategoryFilter[]) => {
-    filtersArray = filtersArray || useGetFilters().filters;
-    for (const filter of filtersArray) {
-        const result = checkFilter(filter, transaction);
-        if (result) {
-            return filter.category;
-        }
-    }
-    return null;
-}
-
-
-export const calcAutoCatMapBulk = (transactions: ITransaction[]) => {
-    let results = new Map<string, ICategory | null>()
-    // let results: { hash: string, category: ICategory | null }
-    const { filters } = useGetFilters();
-    for (const transaction of transactions) {
-        const result = calcAutoCategory(transaction, filters);
-        results.set(transaction.hash, result);
-    }
-    return results;
-}
