@@ -10,7 +10,7 @@ import RuleDialog from '@/components/shared/filterDialog/FilterDialog';
 import { Button } from '@/components/ui/button';
 import { getAllOverlayRules } from '@/lib/actions/filters.actions';
 import { ICategoryFilter } from '@/lib/database/models/categoryFilter.model';
-import { useGetFilters } from '@/lib/query-hooks/Filters';
+// import { useGetFilters } from '@/lib/hooks/filters.hooks';
 
 const FiltersManager = () => {
     const [search, setSearch] = useState<string>('');

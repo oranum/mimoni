@@ -27,7 +27,7 @@ const Sidebar = () => {
             badge: transactions?.length || ''
         },
         { text: 'תובנות', link: '/insights', icon: <MicroscopeIcon /> },
-        { text: 'פילטרים', link: '/filters', icon: <LayoutListIcon /> },
+        // { text: 'פילטרים', link: '/filters', icon: <LayoutListIcon /> },
         { text: 'העלאת קובץ', link: '/upload', icon: <UploadIcon /> }
     ];
 
